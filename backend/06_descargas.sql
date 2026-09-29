@@ -49,10 +49,10 @@ values (
 
     'https://github.com/yeriicc20-commits/casino-royale-web/releases/download/v0.1.0/CasinoRoyale-0.1.0.apk',
     1,
-    75191151,
+    75241695,
 
     'https://github.com/yeriicc20-commits/casino-royale-web/releases/download/v0.1.0/CasinoRoyale-0.1.0-PC.zip',
-    95087719,
+    95057869,
 
     now()
 )
