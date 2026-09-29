@@ -87,6 +87,16 @@ hay versiones publicadas" en lugar de dar error. Eso es a propósito.
    - `backend/01_schema.sql`
    - `backend/02_policies.sql`
    - `backend/03_seed.sql`
+   - `backend/04_online.sql` — las tablas del online del juego
+   - `backend/05_usuarios_y_version.sql` — nombres únicos y la primera versión
+   - `backend/06_descargas.sql`
+   - `backend/09_panel_admin.sql` — **cambia el correo de la última línea por el
+     tuyo**: es lo que te hace administrador
+   - `backend/10_cuentas_en_el_juego.sql` — el online pasa a ir con cuenta
+
+   Todos son idempotentes: volver a ejecutarlos no rompe nada. El `07` borra
+   todos los jugadores y el `08` es una versión concreta; esos solo cuando
+   hagan falta.
 3. Ve a **Settings → API** y copia:
    - *Project URL* → `NEXT_PUBLIC_SUPABASE_URL`
    - *anon public* → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -110,6 +120,35 @@ hay versiones publicadas" en lugar de dar error. Eso es a propósito.
 5. Copia el *Client ID* y el *Client secret* en Supabase y activa el proveedor.
 
 Gratis, sin límite práctico.
+
+### Las direcciones de vuelta
+
+En **Supabase → Authentication → URL Configuration → Redirect URLs** tienen que
+estar las tres:
+
+```
+https://TU-DOMINIO.vercel.app/auth/callback
+casinoroyale://auth
+http://127.0.0.1:52117/auth
+```
+
+La primera es la web. Las otras dos son el juego, y son distintas porque la
+vuelta desde el navegador se hace distinta en cada sitio:
+
+- **Android** usa un enlace propio, `casinoroyale://auth`, que
+  `Assets/_Project/Editor/Build/AndroidPermissions.cs` declara en el manifiesto.
+  Si cambias ese esquema, cámbialo también en `OAuthFlow.AndroidRedirect`.
+- **PC** levanta un servidor diminuto en `127.0.0.1:52117` mientras dura el
+  inicio de sesión. La alternativa era registrar el enlace propio en el registro
+  de Windows, y eso es tocar la configuración del sistema para algo que se
+  resuelve con un puerto abierto veinte segundos.
+
+El juego entra por **PKCE**, no por el flujo normal. El motivo es concreto: el
+flujo normal devuelve los tokens en el *fragmento* de la URL —lo que va después
+de la almohadilla— y un fragmento no se manda al servidor, así que el servidor
+local del PC nunca llegaría a verlos. PKCE devuelve un código en la parte que sí
+viaja, y ese código no vale nada sin el secreto que el juego se guardó antes de
+empezar.
 
 ## 5. Configurar Apple Sign-In
 
@@ -196,18 +235,33 @@ A partir de ese momento:
 Esto es lo que hace que el juego tenga amigos, clasificación y partida en la nube.
 
 **Importante:** el juego habla un protocolo propio, distinto del de la web. Son
-ocho rutas bajo `/api`, ya implementadas en este proyecto:
+estas rutas bajo `/api`, ya implementadas en este proyecto:
 
-| Ruta | Qué hace |
-|---|---|
-| `POST /api/system/time` | El latido. Si responde, el juego pasa a Online |
-| `POST /api/profile/load` | Descarga la partida guardada |
-| `POST /api/profile/save` | La sube, sin pisar una revisión más nueva |
-| `POST /api/social/presence` | "Estoy aquí" + saldo para la clasificación |
-| `POST /api/social/friends` | Lista de amigos |
-| `POST /api/social/friends/add` | Añadir por código |
-| `POST /api/social/friends/remove` | Quitar |
-| `POST /api/social/leaderboard` | Ranking global o de amigos |
+| Ruta | Qué hace | Sesión |
+|---|---|---|
+| `POST /api/system/time` | El latido. Si responde, el juego pasa a Online | no |
+| `POST /api/auth/signin` | Entrar con correo y contraseña | no |
+| `POST /api/auth/signup` | Crear cuenta desde el juego | no |
+| `POST /api/auth/refresh` | Renovar la sesión guardada | no |
+| `POST /api/auth/oauth/start` | La dirección de Google que hay que abrir | no |
+| `POST /api/auth/oauth/exchange` | Cambiar el código por una sesión | no |
+| `POST /api/profile/load` | Descarga la partida guardada | **sí** |
+| `POST /api/profile/save` | La sube, sin pisar una revisión más nueva | **sí** |
+| `POST /api/social/presence` | "Estoy aquí" + saldo, y recoge los ajustes | **sí** |
+| `POST /api/social/friends` | Lista de amigos | **sí** |
+| `POST /api/social/friends/add` | Añadir por código | **sí** |
+| `POST /api/social/friends/remove` | Quitar | **sí** |
+| `POST /api/social/leaderboard` | Ranking global o de amigos | **sí** |
+
+Las marcadas con sesión exigen `Authorization: Bearer <token>` y responden
+**401** sin él. Nada de lo que viaja en el cuerpo decide de quién es la partida:
+el `playerId` que mandaba antes el juego era una cadena elegida por el propio
+móvil, así que bastaba escribir la de otro para publicar su saldo. Ahora la
+identidad sale del token, comprobado contra el servidor de autenticación.
+
+El `playerId` que sigue viajando en `profile/load` y en `presence` solo sirve
+para una cosa: **adoptar** la partida que tuviera ese dispositivo la primera vez
+que alguien entra con cuenta. Así actualizar no cuesta el progreso.
 
 Pasos:
 
