@@ -79,3 +79,34 @@ export function formatDate(value: string | null | undefined): string {
     year: 'numeric',
   });
 }
+
+/**
+ * Céntimos a euros, con el formato de España.
+ *
+ * El juego lleva todo el dinero en céntimos enteros, nunca en coma flotante,
+ * porque 0.1 + 0.2 no es 0.3 y un saldo que se desvía un céntimo cada mil
+ * partidas es un saldo que nadie se cree. Aquí solo se traduce para leerlo.
+ */
+export function formatCents(cents: number | null | undefined): string {
+  const value = typeof cents === 'number' && Number.isFinite(cents) ? cents : 0;
+
+  return (value / 100).toLocaleString('es-ES', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+/** "hace 3 min", "hace 2 h". Para la última vez que se vio a alguien. */
+export function formatSince(value: string | null | undefined): string {
+  if (!value) return 'nunca';
+
+  const seconds = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 1000));
+
+  if (seconds < 90) return 'ahora mismo';
+  if (seconds < 3600) return `hace ${Math.floor(seconds / 60)} min`;
+  if (seconds < 86400) return `hace ${Math.floor(seconds / 3600)} h`;
+
+  return `hace ${Math.floor(seconds / 86400)} d`;
+}

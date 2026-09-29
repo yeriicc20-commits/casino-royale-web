@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -36,8 +37,9 @@ export default async function AdminPage() {
       <div className="shell flex min-h-[60vh] flex-col items-center justify-center text-center">
         <h1 className="heading text-2xl">Sin acceso</h1>
         <p className="mt-3 max-w-md text-sm text-slate-400">
-          Esta zona es solo para administradores. Si deberías tener acceso, asigna el rol
-          desde el SQL Editor de Supabase (ver <code className="text-gold-400">03_seed.sql</code>).
+          Esta zona es solo para administradores. Si deberías tener acceso, ejecuta{' '}
+          <code className="text-gold-400">09_panel_admin.sql</code> con tu correo en el SQL
+          Editor de Supabase.
         </p>
       </div>
     );
@@ -72,7 +74,13 @@ export default async function AdminPage() {
           </p>
         </div>
 
-        {production?.maintenance_mode && <Badge tone="red">Mantenimiento activo</Badge>}
+        <div className="flex items-center gap-3">
+          {production?.maintenance_mode && <Badge tone="red">Mantenimiento activo</Badge>}
+
+          <Link href="/admin/jugadores" className="btn-ghost">
+            Jugadores
+          </Link>
+        </div>
       </header>
 
       {/* ------------------------------------------------ interruptor general */}

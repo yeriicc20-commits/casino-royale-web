@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isValidVersion } from '@/lib/semver';
@@ -128,6 +129,16 @@ export async function POST(request: Request) {
     console.error('[admin/release] config', configError);
     return NextResponse.json({ error: 'Versión guardada, pero no se pudo activar.' }, { status: 500 });
   }
+
+  // Las páginas públicas se regeneran cada minuto por su cuenta, y ese minuto es
+  // justo el que uno pasa recargando la web después de publicar y viéndola con
+  // la versión anterior. Tirar la caché aquí hace que la versión nueva esté a la
+  // vista en cuanto el script termina.
+  revalidatePath('/');
+  revalidatePath('/download');
+  revalidatePath('/updates');
+  revalidatePath(`/updates/${version}`);
+  revalidatePath('/admin');
 
   return NextResponse.json({
     ok: true,

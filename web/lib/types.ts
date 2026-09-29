@@ -133,3 +133,47 @@ export interface ClientRejectedResponse {
   minimumVersion?: string;
   latestVersion?: string;
 }
+
+// ---------------------------------------------------------------- panel
+
+/** Una fila de `admin_players_overview`: un jugador del online, con su resumen. */
+export interface AdminPlayer {
+  player_id: string;
+  name: string;
+  avatar_id: number;
+  friend_code: string | null;
+
+  balance_cents: number;
+  biggest_win_cents: number;
+  rounds: number;
+  last_seen: string;
+
+  friends: number;
+
+  /** Ajustes que el juego todavía no se ha llevado. */
+  pending_grants: number;
+  pending_cents: number;
+
+  /** Cierto si tiene partida guardada en la nube. */
+  has_save: boolean;
+}
+
+/** Un apunte de la cola de ajustes. */
+export interface AdminGrant {
+  id: number;
+  player_id: string;
+  amount_cents: number;
+  reason: string;
+  created_at: string;
+  delivered_at: string | null;
+}
+
+/** Una cuenta de la web (Supabase Auth + su perfil). */
+export interface WebAccount {
+  id: string;
+  email: string | null;
+  display_name: string;
+  role: UserRole;
+  created_at: string;
+  last_sign_in_at: string | null;
+}

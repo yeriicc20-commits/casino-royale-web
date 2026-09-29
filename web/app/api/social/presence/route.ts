@@ -1,4 +1,4 @@
-import { body, corsPreflight, db, fail, int, ok, text } from '@/lib/online';
+import { body, corsPreflight, db, fail, int, json, text } from '@/lib/online';
 
 /**
  * POST /api/social/presence
@@ -13,6 +13,11 @@ import { body, corsPreflight, db, fail, int, ok, text } from '@/lib/online';
  *
  * Un código de amigo que ya tenga otro jugador NO se roba: el que llega tarde
  * se queda sin código publicado antes que romperle el suyo a quien lo tenía.
+ *
+ * La respuesta lleva además los ajustes que el panel haya dejado anotados para
+ * este jugador. Van aquí y no en una ruta propia porque el latido ya existe, ya
+ * ocurre cada treinta segundos y ya sabe quién llama: una segunda petición solo
+ * añadiría latencia y otra cosa que puede fallar por separado.
  */
 export const dynamic = 'force-dynamic';
 
@@ -60,7 +65,41 @@ export async function POST(request: Request) {
     return fail('No se pudo publicar la presencia.');
   }
 
-  return ok();
+  return json({ ok: true, message: '', grants: await claimGrants(client, playerId) });
+}
+
+/** Una fila de la cola de ajustes, ya marcada como entregada. */
+interface GrantRow {
+  id: number | string;
+  amount_cents: number | string;
+  reason: string | null;
+}
+
+/**
+ * Recoge lo que el panel le deba a este jugador.
+ *
+ * Reclamar y marcar como entregado ocurren dentro de la misma sentencia SQL, así
+ * que el móvil y el PC de la misma persona no pueden llevarse el mismo apunte
+ * dos veces.
+ *
+ * Un fallo aquí NO tumba la presencia: el latido sirve sobre todo para que te
+ * vean conectado, y perder eso por un ajuste que puede esperar treinta segundos
+ * sería un mal cambio. También es lo que hace que la ruta siga funcionando antes
+ * de haber ejecutado `09_panel_admin.sql`, cuando la función todavía no existe.
+ */
+async function claimGrants(client: ReturnType<typeof db>, playerId: string) {
+  const { data, error } = await client.rpc('online_grant_claim', { p_player_id: playerId });
+
+  if (error) {
+    console.error('[social/presence] grants', error.message);
+    return [];
+  }
+
+  return ((data ?? []) as GrantRow[]).map((row) => ({
+    id: Number(row.id),
+    amountCents: Number(row.amount_cents),
+    reason: String(row.reason ?? ''),
+  }));
 }
 
 export async function OPTIONS() {
