@@ -1,4 +1,5 @@
-import { body, corsPreflight, db, fail, ok, text } from '@/lib/online';
+import { body, corsPreflight, currentUser, db, fail, needsAccount, ok, text }
+  from '@/lib/online';
 
 /**
  * POST /api/social/friends/remove   { playerId, friendId }
@@ -9,12 +10,15 @@ import { body, corsPreflight, db, fail, ok, text } from '@/lib/online';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
-  const input = await body<{ playerId?: string; friendId?: string }>(request);
+  const user = await currentUser(request);
+  if (!user) return needsAccount();
 
-  const playerId = text(input.playerId, 64);
+  const input = await body<{ friendId?: string }>(request);
+
+  const playerId = user.id;
   const friendId = text(input.friendId, 64);
 
-  if (!playerId || !friendId) return fail('Faltan datos.');
+  if (!friendId) return fail('Faltan datos.');
 
   const client = db();
 

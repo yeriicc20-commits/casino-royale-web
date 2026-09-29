@@ -1,4 +1,5 @@
-import { body, corsPreflight, db, fail, json, ok, text } from '@/lib/online';
+import { body, corsPreflight, currentUser, db, fail, json, needsAccount, ok }
+  from '@/lib/online';
 
 /**
  * POST /api/profile/save   (el sobre entero)
@@ -23,6 +24,9 @@ interface Envelope {
 }
 
 export async function POST(request: Request) {
+  const user = await currentUser(request);
+  if (!user) return needsAccount();
+
   const envelope = await body<Envelope>(request);
 
   const payload = String(envelope.payload ?? '');
@@ -32,11 +36,10 @@ export async function POST(request: Request) {
   // nada, y eso no se puede deshacer.
   if (!payload) return fail('Sobre vacío.');
 
-  // El identificador viaja dentro del contenido cifrado, así que se toma del
-  // deviceId, que es lo único de fuera en lo que se puede confiar para saber a
-  // quién pertenece esto.
-  const playerId = text(envelope.deviceId, 64);
-  if (!playerId) return fail('Sin identificador.');
+  // De la sesión, nunca del sobre. El deviceId que viene dentro lo escribe el
+  // propio móvil, así que mandar el de otra persona bastaría para pisarle la
+  // partida; el token, en cambio, hay que tenerlo.
+  const playerId = user.id;
 
   const client = db();
 

@@ -108,13 +108,78 @@ export function toLeaderboardEntry(row: PlayerRow, rank: number) {
   };
 }
 
+/**
+ * Quien llama, segun su sesion de Supabase.
+ *
+ * El juego manda su token en la cabecera Authorization, igual que el navegador.
+ * Se comprueba SIEMPRE contra el servidor de autenticacion y nunca se cree lo
+ * que venga en el cuerpo: el playerId que mandaba antes el cliente era una
+ * cadena elegida por el propio movil, asi que cualquiera podia escribir la de
+ * otro y publicar su saldo.
+ *
+ * Devuelve null si no hay sesion o si el token ya no vale.
+ */
+export async function currentUser(request: Request): Promise<{ id: string; email: string | null } | null> {
+  const header = request.headers.get('Authorization') ?? '';
+  const token = header.toLowerCase().startsWith('bearer ') ? header.slice(7).trim() : '';
+
+  if (!token) return null;
+
+  try {
+    const { data, error } = await db().auth.getUser(token);
+    if (error || !data.user) return null;
+
+    return { id: data.user.id, email: data.user.email ?? null };
+  } catch (error) {
+    console.error('[online.currentUser]', error);
+    return null;
+  }
+}
+
+/**
+ * El identificador con el que este jugador existe en el online, que es el de su
+ * cuenta.
+ *
+ * La primera vez adopta lo que tuviera el dispositivo -saldo, amigos, partida-
+ * para que actualizar no cueste el progreso. Lo hace la base de datos en una
+ * sola sentencia porque son cuatro tablas que tienen que moverse juntas.
+ */
+export async function claimIdentity(userId: string, deviceId?: string, name?: string): Promise<string> {
+  const { data, error } = await db().rpc('online_claim_identity', {
+    p_user: userId,
+    p_device: deviceId ?? null,
+    p_name: name ?? null,
+  });
+
+  if (error) {
+    console.error('[online.claimIdentity]', error);
+    return userId;
+  }
+
+  return String(data ?? userId);
+}
+
+/**
+ * La respuesta a quien llama sin sesion.
+ *
+ * 401 y no 200: el juego distingue ese codigo y sabe que tiene que pedir la
+ * cuenta, en vez de quedarse en "no hay conexion" con la wifi funcionando.
+ */
+export function needsAccount() {
+  return json(
+    { ok: false, error: 'AUTH_REQUIRED', message: 'Entra con tu cuenta para jugar en línea.' },
+    401,
+  );
+}
+
 export function corsPreflight() {
   return new NextResponse(null, {
     status: 204,
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, X-Game-Version, X-Game-Platform',
+      'Access-Control-Allow-Headers':
+        'Content-Type, Authorization, X-Game-Version, X-Game-Platform',
     },
   });
 }

@@ -81,6 +81,12 @@ export function PlayerRow({ player }: { player: AdminPlayer }) {
           {player.name}
         </span>
 
+        {player.email && (
+          <span className="hidden min-w-0 max-w-[14rem] truncate text-xs text-slate-500 md:inline">
+            {player.email}
+          </span>
+        )}
+
         {player.friend_code && (
           <code className="rounded bg-white/5 px-2 py-0.5 text-xs text-slate-400">
             {player.friend_code}
@@ -291,7 +297,7 @@ export function PlayerRow({ player }: { player: AdminPlayer }) {
 
           <dl className="grid grid-cols-2 gap-x-6 gap-y-2 border-t border-white/8 pt-5 text-xs
                          sm:grid-cols-4">
-            <Field label="Identificador" value={player.player_id} mono />
+            <Field label="Cuenta" value={player.email ?? 'sin cuenta (versión antigua)'} />
             <Field label="Mayor premio" value={formatCents(player.biggest_win_cents)} />
             <Field label="Rondas" value={String(player.rounds)} />
             <Field label="Partida en la nube" value={player.has_save ? 'Sí' : 'No'} />

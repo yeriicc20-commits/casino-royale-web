@@ -1,4 +1,5 @@
-import { body, corsPreflight, db, fail, int, json, text } from '@/lib/online';
+import { body, claimIdentity, corsPreflight, currentUser, db, fail, int, json,
+  needsAccount, text } from '@/lib/online';
 
 /**
  * POST /api/social/presence
@@ -22,10 +23,13 @@ import { body, corsPreflight, db, fail, int, json, text } from '@/lib/online';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  const user = await currentUser(request);
+  if (!user) return needsAccount();
+
   const input = await body<Record<string, unknown>>(request);
 
-  const playerId = text(input.playerId, 64);
-  if (!playerId) return fail('playerId requerido.');
+  const playerId = await claimIdentity(
+    user.id, text(input.playerId, 64), text(input.name, 16));
 
   const client = db();
 
@@ -44,6 +48,7 @@ export async function POST(request: Request) {
 
   const row: Record<string, unknown> = {
     player_id: playerId,
+    user_id: user.id,
     name: text(input.name, 16) || 'Jugador',
     avatar_id: int(input.avatarId),
     balance_cents: int(input.balanceCents),

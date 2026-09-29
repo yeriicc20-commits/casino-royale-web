@@ -1,4 +1,5 @@
-import { body, corsPreflight, db, fail, json, text } from '@/lib/online';
+import { body, corsPreflight, currentUser, db, fail, json, needsAccount, text }
+  from '@/lib/online';
 
 /**
  * POST /api/social/friends/add   { playerId, code }
@@ -11,12 +12,15 @@ import { body, corsPreflight, db, fail, json, text } from '@/lib/online';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
-  const input = await body<{ playerId?: string; code?: string }>(request);
+  const user = await currentUser(request);
+  if (!user) return needsAccount();
 
-  const playerId = text(input.playerId, 64);
+  const input = await body<{ code?: string }>(request);
+
+  const playerId = user.id;
   const code = text(input.code, 16).toUpperCase().replace(/-/g, '');
 
-  if (!playerId || !code) return fail('Faltan datos.');
+  if (!code) return fail('Faltan datos.');
 
   const { data, error } = await db().rpc('online_friend_add', {
     me: playerId,

@@ -1,4 +1,5 @@
-import { body, corsPreflight, db, json, text } from '@/lib/online';
+import { body, claimIdentity, corsPreflight, currentUser, db, json, needsAccount, text }
+  from '@/lib/online';
 
 /**
  * POST /api/profile/load   { playerId }
@@ -14,14 +15,23 @@ import { body, corsPreflight, db, json, text } from '@/lib/online';
  * Sin perfil se responde 200 con el sobre vacío: el juego lo interpreta como
  * "el servidor no tiene nada mío todavía", que es la primera vez de cualquiera
  * y no un error.
+ *
+ * Esta es además la llamada donde se reclama la identidad, porque es la primera
+ * que hace el juego al conectar: si este jugador venía de una partida atada al
+ * dispositivo, aquí es donde pasa a ser de su cuenta, con su saldo y sus amigos
+ * detrás.
  */
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
-  const input = await body<{ playerId?: string }>(request);
-  const playerId = text(input.playerId, 64);
+  const user = await currentUser(request);
+  if (!user) return needsAccount();
 
-  if (!playerId) return json({ payload: '' });
+  const input = await body<{ playerId?: string }>(request);
+
+  // El playerId que manda el juego es el del dispositivo, y solo sirve para
+  // saber qué partida adoptar. El identificador bueno lo devuelve la base.
+  const playerId = await claimIdentity(user.id, text(input.playerId, 64));
 
   const { data, error } = await db()
     .from('online_profiles')

@@ -1,5 +1,6 @@
 import {
-  body, corsPreflight, db, json, LEADERBOARD_LIMIT, PlayerRow, text, toLeaderboardEntry,
+  body, corsPreflight, currentUser, db, json, LEADERBOARD_LIMIT, needsAccount,
+  PlayerRow, text, toLeaderboardEntry,
 } from '@/lib/online';
 
 /**
@@ -14,9 +15,12 @@ import {
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  const user = await currentUser(request);
+  if (!user) return needsAccount();
+
   const input = await body<{ playerId?: string; scope?: string }>(request);
 
-  const playerId = text(input.playerId, 64);
+  const playerId = user.id;
   const friendsOnly = text(input.scope, 16) === 'friends';
 
   const client = db();

@@ -54,9 +54,11 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Todo menos estáticos e imágenes. La API de versiones queda fuera a
-     * propósito: la consulta Unity sin cookies y no necesita sesión.
+     * Todo menos estáticos e imágenes. La API entera queda fuera a propósito:
+     * la consulta el juego, que no manda cookies y lleva su sesión en la
+     * cabecera Authorization. Refrescarle una cookie que no tiene solo añade
+     * una llamada al servidor de autenticación en cada latido.
      */
-    '/((?!_next/static|_next/image|favicon|api/game|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    '/((?!_next/static|_next/image|favicon|api/|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 };

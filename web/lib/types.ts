@@ -148,6 +148,10 @@ export interface AdminPlayer {
   rounds: number;
   last_seen: string;
 
+  /** La cuenta con la que entra, desde que el online va con cuenta. */
+  user_id: string | null;
+  email: string | null;
+
   friends: number;
 
   /** Ajustes que el juego todavía no se ha llevado. */

@@ -1,5 +1,6 @@
 import {
-  body, corsPreflight, db, isOnline, json, PlayerRow, secondsSince, text,
+  body, corsPreflight, currentUser, db, isOnline, json, needsAccount, PlayerRow,
+  secondsSince, text,
 } from '@/lib/online';
 
 /**
@@ -12,10 +13,10 @@ import {
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
-  const input = await body<{ playerId?: string }>(request);
-  const playerId = text(input.playerId, 64);
+  const user = await currentUser(request);
+  if (!user) return needsAccount();
 
-  if (!playerId) return json({ friends: [] });
+  const playerId = user.id;
 
   const client = db();
 
