@@ -310,6 +310,12 @@ revoke all on function public.admin_rename_player(text, text, uuid) from public,
 --  7. La lista que ve el panel
 -- ============================================================================
 
+-- Se tira antes de crearla: "create or replace view" solo admite ANADIR
+-- columnas al final, nunca meter una en medio, y aqui user_id y email entran
+-- antes de friends. Nada depende de esta vista salvo la consulta del panel, asi
+-- que tirarla no tiene coste.
+drop view if exists public.admin_players_overview;
+
 create or replace view public.admin_players_overview as
 select p.player_id,
        p.name,

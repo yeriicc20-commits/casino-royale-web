@@ -157,6 +157,12 @@ revoke all on function public.online_claim_identity(uuid, text, text)
 --  4. El panel, con el correo de cada jugador
 -- ============================================================================
 
+-- Se tira antes de crearla: "create or replace view" solo admite ANADIR
+-- columnas al final, nunca meter una en medio, y aqui user_id y email entran
+-- antes de friends. Nada depende de esta vista salvo la consulta del panel, asi
+-- que tirarla no tiene coste.
+drop view if exists public.admin_players_overview;
+
 create or replace view public.admin_players_overview as
 select p.player_id,
        p.name,
