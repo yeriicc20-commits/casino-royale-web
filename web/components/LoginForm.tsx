@@ -1,47 +1,93 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
 /**
- * Inicio de sesión.
+ * Entrar y crear cuenta.
  *
  * Tres proveedores desde el principio: Google, Apple y correo. Añadir un cuarto
- * es una entrada más en el array `PROVIDERS` y activarlo en el panel de
- * Supabase — no hace falta tocar nada más, que es justo lo que se pedía de la
- * arquitectura.
+ * es una entrada más en PROVIDERS y activarlo en el panel de Supabase.
  *
- * Nota sobre Apple: exige una cuenta de Apple Developer de pago (99 $/año) para
- * emitir las claves. Google y el correo son gratis. Por eso el botón de Apple
- * está preparado pero se puede dejar apagado hasta que tengas esa cuenta.
+ * Los botones de Google y Apple están SIEMPRE visibles aunque el proveedor no
+ * esté configurado todavía, pero si se pulsa uno sin configurar el mensaje dice
+ * exactamente eso en lugar de soltar el error en inglés de Supabase. Un "no se
+ * pudo completar el inicio de sesión" no le dice a nadie que lo que falta es
+ * pegar dos claves en un panel.
  */
 
+const MIN_NAME = 3;
+const MAX_NAME = 24;
+
 const PROVIDERS = [
-  { id: 'google' as const, label: 'Continuar con Google', icon: <GoogleIcon />, enabled: true },
-  { id: 'apple' as const, label: 'Continuar con Apple', icon: <AppleIcon />, enabled: true },
+  { id: 'google' as const, label: 'Continuar con Google', icon: <GoogleIcon /> },
+  { id: 'apple' as const, label: 'Continuar con Apple', icon: <AppleIcon /> },
 ];
+
+type Mode = 'signin' | 'signup';
+type NameState = 'idle' | 'checking' | 'free' | 'taken' | 'short';
 
 export function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get('next') ?? '/account';
 
+  const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+  const [name, setName] = useState('');
+  const [nameState, setNameState] = useState<NameState>('idle');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ tone: 'error' | 'ok'; text: string } | null>(
     params.get('error') ? { tone: 'error', text: 'No se pudo completar el inicio de sesión.' } : null,
   );
 
+  // El último nombre que se pidió comprobar. Sin esto, una respuesta lenta de
+  // una consulta vieja puede pisar el resultado de la que el usuario espera.
+  const lastAsked = useRef('');
+
+  const checkName = useCallback(async (value: string) => {
+    const trimmed = value.trim();
+    lastAsked.current = trimmed;
+
+    if (trimmed.length < MIN_NAME) {
+      setNameState('short');
+      return;
+    }
+
+    setNameState('checking');
+
+    const { data, error } = await createClient().rpc('display_name_available', {
+      wanted: trimmed,
+    });
+
+    if (lastAsked.current !== trimmed) return;   // llegó tarde: ya no interesa
+
+    if (error) {
+      // La comprobación previa es una comodidad, no la defensa: el índice único
+      // de la base de datos es lo que de verdad impide dos nombres iguales.
+      setNameState('idle');
+      return;
+    }
+
+    setNameState(data ? 'free' : 'taken');
+  }, []);
+
+  useEffect(() => {
+    if (mode !== 'signup') return;
+    if (!name.trim()) { setNameState('idle'); return; }
+
+    const timer = setTimeout(() => void checkName(name), 400);
+    return () => clearTimeout(timer);
+  }, [name, mode, checkName]);
+
   async function signInWithProvider(provider: 'google' | 'apple') {
     setBusy(true);
     setMessage(null);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error } = await createClient().auth.signInWithOAuth({
       provider,
       options: {
         redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
@@ -49,41 +95,60 @@ export function LoginForm() {
     });
 
     if (error) {
-      setMessage({ tone: 'error', text: error.message });
+      setMessage({ tone: 'error', text: translate(error.message, provider) });
       setBusy(false);
     }
-    // Si no hay error, el navegador ya está yéndose al proveedor.
   }
 
   async function submitEmail(event: React.FormEvent) {
     event.preventDefault();
-    setBusy(true);
-    setMessage(null);
 
     const supabase = createClient();
 
     if (mode === 'signup') {
+      const trimmed = name.trim();
+
+      if (trimmed.length < MIN_NAME) {
+        setMessage({ tone: 'error', text: `El nombre necesita al menos ${MIN_NAME} letras.` });
+        return;
+      }
+
+      if (nameState === 'taken') {
+        setMessage({ tone: 'error', text: 'Ese nombre ya está cogido. Prueba con otro.' });
+        return;
+      }
+
+      setBusy(true);
+      setMessage(null);
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          // Lo recoge el disparador handle_new_user() al crear el perfil.
+          data: { display_name: trimmed },
+        },
       });
 
       setBusy(false);
 
       setMessage(
         error
-          ? { tone: 'error', text: traducir(error.message) }
-          : { tone: 'ok', text: 'Te hemos enviado un correo para confirmar la cuenta.' },
+          ? { tone: 'error', text: translate(error.message) }
+          : { tone: 'ok', text: 'Cuenta creada. Revisa tu correo para confirmarla.' },
       );
       return;
     }
+
+    setBusy(true);
+    setMessage(null);
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
 
     if (error) {
-      setMessage({ tone: 'error', text: traducir(error.message) });
+      setMessage({ tone: 'error', text: translate(error.message) });
       return;
     }
 
@@ -91,17 +156,31 @@ export function LoginForm() {
     router.refresh();
   }
 
+  const nameHint = {
+    idle: '',
+    short: `Al menos ${MIN_NAME} letras.`,
+    checking: 'Comprobando…',
+    free: 'Libre.',
+    taken: 'Ya está cogido.',
+  }[nameState];
+
+  const nameTone = nameState === 'free' ? 'text-emerald-400'
+                 : nameState === 'taken' || nameState === 'short' ? 'text-red-400'
+                 : 'text-slate-500';
+
   return (
     <div className="shell flex min-h-[70vh] items-center justify-center py-16">
       <div className="panel-gold w-full max-w-md p-8">
-        <h1 className="heading text-2xl">Iniciar sesión</h1>
+        <h1 className="heading text-2xl">
+          {mode === 'signin' ? 'Iniciar sesión' : 'Crear cuenta'}
+        </h1>
         <p className="mt-2 text-sm leading-relaxed text-slate-400">
           Tu saldo y tu progreso te siguen a otro dispositivo. Para jugar sin conexión no
           hace falta cuenta.
         </p>
 
         <div className="mt-7 space-y-3">
-          {PROVIDERS.filter((p) => p.enabled).map((provider) => (
+          {PROVIDERS.map((provider) => (
             <button
               key={provider.id}
               type="button"
@@ -122,6 +201,27 @@ export function LoginForm() {
         </div>
 
         <form onSubmit={submitEmail} className="space-y-4">
+          {mode === 'signup' && (
+            <div>
+              <label className="label" htmlFor="name">
+                Nombre de jugador
+                {nameHint && <span className={`ml-2 font-normal normal-case ${nameTone}`}>{nameHint}</span>}
+              </label>
+              <input
+                id="name"
+                type="text"
+                required
+                minLength={MIN_NAME}
+                maxLength={MAX_NAME}
+                autoComplete="nickname"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                className="field"
+                placeholder="Como te verán los demás"
+              />
+            </div>
+          )}
+
           <div>
             <label className="label" htmlFor="email">Correo</label>
             <input
@@ -151,7 +251,11 @@ export function LoginForm() {
             />
           </div>
 
-          <button type="submit" disabled={busy} className="btn-gold w-full">
+          <button
+            type="submit"
+            disabled={busy || (mode === 'signup' && nameState === 'taken')}
+            className="btn-gold w-full"
+          >
             {busy ? 'Un momento…' : mode === 'signin' ? 'Entrar' : 'Crear cuenta'}
           </button>
         </form>
@@ -159,7 +263,7 @@ export function LoginForm() {
         {message && (
           <p
             role="status"
-            className={`mt-4 rounded-xl border p-3 text-sm ${
+            className={`mt-4 rounded-xl border p-3 text-sm leading-relaxed ${
               message.tone === 'error'
                 ? 'border-ruby-500/30 bg-ruby-500/10 text-red-300'
                 : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
@@ -171,7 +275,11 @@ export function LoginForm() {
 
         <button
           type="button"
-          onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setMessage(null); }}
+          onClick={() => {
+            setMode(mode === 'signin' ? 'signup' : 'signin');
+            setMessage(null);
+            setNameState('idle');
+          }}
           className="mt-5 w-full text-sm text-slate-400 hover:text-gold-300"
         >
           {mode === 'signin' ? '¿No tienes cuenta? Crear una' : '¿Ya tienes cuenta? Entrar'}
@@ -187,16 +295,40 @@ export function LoginForm() {
   );
 }
 
-/** Los mensajes de Supabase llegan en inglés y esta es la pantalla donde más duele. */
-function traducir(message: string): string {
+/**
+ * Los mensajes de Supabase llegan en inglés, y esta es la pantalla donde peor
+ * sientan: alguien que no consigue entrar y encima no entiende el motivo, se va.
+ */
+function translate(message: string, provider?: string): string {
+  const lower = message.toLowerCase();
+
+  // El más importante: el proveedor existe en el código pero no está activado en
+  // Supabase. Decirlo con claridad ahorra buscar un fallo que no está en la web.
+  if (lower.includes('provider is not enabled') || lower.includes('unsupported provider')) {
+    const name = provider === 'google' ? 'Google' : provider === 'apple' ? 'Apple' : 'Ese proveedor';
+    return `${name} todavía no está configurado. Hay que activarlo en Supabase, en Authentication → Providers.`;
+  }
+
   const map: Record<string, string> = {
-    'Invalid login credentials': 'El correo o la contraseña no son correctos.',
-    'Email not confirmed': 'Todavía no has confirmado el correo. Revisa tu bandeja de entrada.',
-    'User already registered': 'Ya existe una cuenta con ese correo.',
-    'Password should be at least 6 characters': 'La contraseña es demasiado corta.',
+    'invalid login credentials': 'El correo o la contraseña no son correctos.',
+    'email not confirmed': 'Todavía no has confirmado el correo. Revisa tu bandeja de entrada.',
+    'user already registered': 'Ya existe una cuenta con ese correo.',
+    'password should be at least 6 characters': 'La contraseña es demasiado corta.',
+    'signup requires a valid password': 'Escribe una contraseña.',
+    'unable to validate email address: invalid format': 'Ese correo no tiene un formato válido.',
+    'email rate limit exceeded':
+      'Se han enviado demasiados correos seguidos. Supabase limita el envío en el plan gratuito; espera un rato.',
   };
 
-  return map[message] ?? message;
+  for (const [key, value] of Object.entries(map)) {
+    if (lower.includes(key)) return value;
+  }
+
+  if (lower.includes('duplicate key') && lower.includes('display_name')) {
+    return 'Ese nombre de jugador ya está cogido.';
+  }
+
+  return message;
 }
 
 function GoogleIcon() {
