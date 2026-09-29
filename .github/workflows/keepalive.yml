@@ -1,0 +1,40 @@
+# Mantiene despierto el proyecto gratuito de Supabase.
+#
+# Un proyecto del plan gratuito que pasa SIETE DÍAS sin recibir ninguna
+# petición se pausa, y hay que reactivarlo a mano desde el panel. Si eso
+# ocurre, el juego se queda sin servidor de versiones sin que nadie haya tocado
+# nada, y lo único que se ve desde fuera es que el online dejó de funcionar.
+#
+# Una consulta diaria lo evita. GitHub Actions es gratis en repositorios
+# públicos y da 2.000 minutos al mes en los privados; esto consume segundos.
+#
+# Secretos que hay que crear en el repositorio
+# (Settings > Secrets and variables > Actions):
+#   CRON_SECRET  la misma cadena que pusiste en las variables de Vercel
+#   SITE_URL     https://tu-dominio.com   (sin barra final)
+
+name: Mantener Supabase despierto
+
+on:
+  schedule:
+    # 06:15 UTC cada día. Un minuto "raro" a propósito: en punto es cuando
+    # GitHub acumula más cola y los cron se retrasan más.
+    - cron: '15 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar la API
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.SITE_URL }}/api/cron/keepalive")
+
+          echo "Respuesta: $code"
+
+          if [ "$code" != "200" ]; then
+            echo "::error::El ping falló con código $code"
+            exit 1
+          fi

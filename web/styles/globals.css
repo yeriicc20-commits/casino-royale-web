@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-display: 'Cinzel', Georgia, 'Times New Roman', serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-ink-950 text-slate-200 antialiased;
+    /* Fondo explícito: sin esto, el rebote elástico de iOS enseña blanco por
+       debajo de la página y rompe el tema oscuro justo al hacer scroll. */
+    background-color: #05060e;
+  }
+
+  /* El foco se ve. Quitarlo deja la web inutilizable con teclado, y el diseño
+     oscuro hace que el contorno por defecto no se distinga. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-gold-400 ring-offset-2 ring-offset-ink-950;
+  }
+
+  ::selection {
+    @apply bg-gold-500/30 text-white;
+  }
+}
+
+@layer components {
+  /* Contenedor común. 16 px de margen lateral en móvil, que es lo que hace que
+     el texto no toque el borde de la pantalla. */
+  .shell {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .heading {
+    @apply font-display font-bold tracking-wide text-white;
+  }
+
+  .gold-text {
+    @apply bg-gold-sheen bg-clip-text text-transparent;
+    background-size: 200% auto;
+  }
+
+  .panel {
+    @apply rounded-2xl border border-white/10 bg-ink-900/80 shadow-card backdrop-blur-sm;
+  }
+
+  .panel-gold {
+    @apply rounded-2xl border border-gold-500/35 bg-ink-900/85 shadow-card;
+  }
+
+  .btn {
+    @apply inline-flex select-none items-center justify-center gap-2 rounded-xl px-6 py-3
+           text-sm font-semibold tracking-wide transition-all duration-200
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-gold {
+    @apply btn bg-gold-500 text-ink-950 shadow-glow hover:bg-gold-400 hover:shadow-glow-lg
+           active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply btn border border-white/15 bg-white/5 text-slate-100
+           hover:border-gold-500/40 hover:bg-white/10 active:scale-[0.98];
+  }
+
+  .btn-quiet {
+    @apply btn text-slate-300 hover:text-gold-300;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-gold-500/30
+           bg-gold-500/10 px-3 py-1 text-xs font-medium text-gold-300;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-white/12 bg-ink-800 px-4 py-3 text-sm text-white
+           placeholder:text-slate-500 focus:border-gold-500/50 focus:outline-none
+           focus:ring-1 focus:ring-gold-500/40;
+  }
+
+  .label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-400;
+  }
+}
+
+/* Quien haya pedido menos movimiento en su sistema, no lo recibe. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
