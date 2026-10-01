@@ -3,6 +3,7 @@ import {
   PlayerRow, text, toLeaderboardEntry,
 } from '@/lib/online';
 import { guardOnlineAccess } from '@/lib/versions';
+import { globalRows, playerIdOf, rankingFor } from '@/lib/ranking';
 
 /**
  * POST /api/social/leaderboard   { playerId, scope }
@@ -25,7 +26,8 @@ export async function POST(request: Request) {
 
   const input = await body<{ playerId?: string; scope?: string }>(request);
 
-  const playerId = user.id;
+  // El jugador en línea de esta cuenta (sus amistades van con ese id).
+  const playerId = await playerIdOf(user.id);
   const friendsOnly = text(input.scope, 16) === 'friends';
 
   const client = db();
@@ -55,43 +57,12 @@ export async function POST(request: Request) {
     rows = (data ?? []) as PlayerRow[];
     total = rows.length;
   } else {
-    const [page, count] = await Promise.all([
-      client
-        .from('online_players')
-        .select('*')
-        .order('balance_cents', { ascending: false })
-        .limit(LEADERBOARD_LIMIT),
-      client.from('online_players').select('player_id', { count: 'exact', head: true }),
-    ]);
-
-    rows = (page.data ?? []) as PlayerRow[];
-    total = count.count ?? rows.length;
+    // Todas las cuentas registradas, hayan jugado en línea o no.
+    return json(rankingFor(await globalRows(), user.id, LEADERBOARD_LIMIT));
   }
 
   const entries = rows.map((row, index) => toLeaderboardEntry(row, index + 1));
-  let you = entries.find((entry) => entry.playerId === playerId) ?? null;
-
-  // Fuera de la página: se cuenta cuánta gente tiene más saldo y ese número
-  // más uno es el puesto.
-  if (!you && playerId) {
-    const { data: mine } = await client
-      .from('online_players')
-      .select('*')
-      .eq('player_id', playerId)
-      .maybeSingle();
-
-    if (mine) {
-      const row = mine as PlayerRow;
-
-      const { count: ahead } = await client
-        .from('online_players')
-        .select('player_id', { count: 'exact', head: true })
-        .gt('balance_cents', row.balance_cents);
-
-      you = toLeaderboardEntry(row, (ahead ?? 0) + 1);
-    }
-  }
-
+  const you = entries.find((entry) => entry.playerId === playerId) ?? null;
   return json({ entries, you, total });
 }
 

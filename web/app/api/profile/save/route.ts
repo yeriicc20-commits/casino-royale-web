@@ -1,6 +1,7 @@
 import { body, corsPreflight, currentUser, db, fail, json, needsAccount, ok }
   from '@/lib/online';
 import { guardOnlineAccess } from '@/lib/versions';
+import { impossibleJump, walletFromPayload } from '@/lib/anticheat';
 
 /**
  * POST /api/profile/save   (el sobre entero)
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
 
   const { data: current } = await client
     .from('online_profiles')
-    .select('revision')
+    .select('revision, envelope, updated_at')
     .eq('player_id', playerId)
     .maybeSingle();
 
@@ -59,6 +60,23 @@ export async function POST(request: Request) {
       { ok: false, message: 'El servidor tiene una versión más nueva.' },
       200,
     );
+  }
+
+  // Saldo imposible (juego modificado): no se guarda.
+  const next = walletFromPayload(payload);
+  const prevEnvelope = current?.envelope as { payload?: string } | undefined;
+  const prev = prevEnvelope?.payload ? walletFromPayload(String(prevEnvelope.payload)) : null;
+  if (next && prev) {
+    const { data: players } = await client.from('online_players').select('player_id').eq('user_id', user.id);
+    const why = await impossibleJump(
+      { ...prev, at: Date.parse(String(current?.updated_at ?? '')) || Date.now() },
+      { ...next, at: Date.now() },
+      (players ?? []).map((p) => String((p as { player_id: string }).player_id)),
+    );
+    if (why) {
+      console.warn('[profile/save] saldo rechazado', user.id, why);
+      return json({ ok: false, error: 'SUSPICIOUS_BALANCE', message: why }, 200);
+    }
   }
 
   const { error } = await client.from('online_profiles').upsert(

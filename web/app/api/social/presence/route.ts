@@ -1,6 +1,7 @@
 import { body, claimIdentity, corsPreflight, currentUser, db, fail, int, json,
   needsAccount, text } from '@/lib/online';
 import { guardOnlineAccess } from '@/lib/versions';
+import { impossibleJump } from '@/lib/anticheat';
 
 /**
  * POST /api/social/presence
@@ -61,6 +62,25 @@ export async function POST(request: Request) {
     rounds: int(input.rounds),
     last_seen: new Date().toISOString(),
   };
+
+  // Saldo imposible para el podio (juego modificado): se queda el de antes.
+  const { data: before } = await client
+    .from('online_players')
+    .select('balance_cents, rounds, last_seen')
+    .eq('player_id', playerId)
+    .maybeSingle();
+  if (before) {
+    const why = await impossibleJump(
+      { balanceCents: Number(before.balance_cents || 0), rounds: Number(before.rounds || 0), at: Date.parse(String(before.last_seen)) || Date.now() },
+      { balanceCents: Number(row.balance_cents || 0), rounds: Number(row.rounds || 0), at: Date.now() },
+      [playerId],
+    );
+    if (why) {
+      console.warn('[social/presence] saldo ignorado', playerId, why);
+      row.balance_cents = Number(before.balance_cents || 0);
+      row.rounds = Number(before.rounds || 0);
+    }
+  }
 
   // Solo se toca el código cuando hay uno válido que poner. Mandar null en el
   // upsert borraría el que ya tuviera guardado.
