@@ -1,5 +1,6 @@
 import { body, claimIdentity, corsPreflight, currentUser, db, fail, int, json,
   needsAccount, text } from '@/lib/online';
+import { guardOnlineAccess } from '@/lib/versions';
 
 /**
  * POST /api/social/presence
@@ -23,6 +24,10 @@ import { body, claimIdentity, corsPreflight, currentUser, db, fail, int, json,
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  // Versiones demasiado viejas o modo mantenimiento: fuera del online.
+  const rejected = await guardOnlineAccess(request);
+  if (rejected) return json(rejected.body, rejected.status);
+
   const user = await currentUser(request);
   if (!user) return needsAccount();
 

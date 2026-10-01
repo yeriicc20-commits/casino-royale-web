@@ -1,5 +1,6 @@
 import { body, claimIdentity, corsPreflight, currentUser, db, json, needsAccount, text }
   from '@/lib/online';
+import { guardOnlineAccess } from '@/lib/versions';
 
 /**
  * POST /api/profile/load   { playerId }
@@ -24,6 +25,10 @@ import { body, claimIdentity, corsPreflight, currentUser, db, json, needsAccount
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  // Versiones demasiado viejas o modo mantenimiento: fuera del online.
+  const rejected = await guardOnlineAccess(request);
+  if (rejected) return json(rejected.body, rejected.status);
+
   const user = await currentUser(request);
   if (!user) return needsAccount();
 

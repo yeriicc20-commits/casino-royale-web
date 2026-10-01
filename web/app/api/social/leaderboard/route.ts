@@ -2,6 +2,7 @@ import {
   body, corsPreflight, currentUser, db, json, LEADERBOARD_LIMIT, needsAccount,
   PlayerRow, text, toLeaderboardEntry,
 } from '@/lib/online';
+import { guardOnlineAccess } from '@/lib/versions';
 
 /**
  * POST /api/social/leaderboard   { playerId, scope }
@@ -15,6 +16,10 @@ import {
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  // Versiones demasiado viejas o modo mantenimiento: fuera del online.
+  const rejected = await guardOnlineAccess(request);
+  if (rejected) return json(rejected.body, rejected.status);
+
   const user = await currentUser(request);
   if (!user) return needsAccount();
 

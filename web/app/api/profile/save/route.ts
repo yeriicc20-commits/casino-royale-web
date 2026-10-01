@@ -1,5 +1,6 @@
 import { body, corsPreflight, currentUser, db, fail, json, needsAccount, ok }
   from '@/lib/online';
+import { guardOnlineAccess } from '@/lib/versions';
 
 /**
  * POST /api/profile/save   (el sobre entero)
@@ -24,6 +25,10 @@ interface Envelope {
 }
 
 export async function POST(request: Request) {
+  // Versiones demasiado viejas o modo mantenimiento: fuera del online.
+  const rejected = await guardOnlineAccess(request);
+  if (rejected) return json(rejected.body, rejected.status);
+
   const user = await currentUser(request);
   if (!user) return needsAccount();
 
