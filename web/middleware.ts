@@ -59,6 +59,6 @@ export const config = {
      * cabecera Authorization. Refrescarle una cookie que no tiene solo añade
      * una llamada al servidor de autenticación en cada latido.
      */
-    '/((?!_next/static|_next/image|favicon|api/|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    '/((?!_next/static|_next/image|favicon|api/|jugar|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 };

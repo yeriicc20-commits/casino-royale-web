@@ -80,6 +80,15 @@ def fijar_version(version):
     return codigo_nuevo
 
 
+def leer_version_code():
+    """El versionCode con el que se compilo lo que hay en Builds/ (para la web)."""
+    with open(AJUSTES, encoding="utf-8") as f:
+        for linea in f:
+            if linea.startswith("  AndroidBundleVersionCode:"):
+                return int(linea.split(":")[1].strip())
+    return None
+
+
 # ------------------------------------------------------------------ 2. compilar
 
 def unity(metodo, log):
@@ -280,11 +289,12 @@ def main():
     args = p.parse_args()
     version = args.version.strip()
 
-    if os.path.exists(os.path.join(PROYECTO, "Temp", "UnityLockfile")):
+    codigo = None
+
+    # Con --sin-compilar no se abre Unity en modo batch, asi que puede seguir abierto.
+    if not args.sin_compilar and os.path.exists(os.path.join(PROYECTO, "Temp", "UnityLockfile")):
         print("Unity esta abierto. Cierralo antes de compilar.")
         sys.exit(1)
-
-    codigo = None
 
     if not args.sin_compilar:
         paso("1/5  Version en los ajustes de Unity")
@@ -301,6 +311,8 @@ def main():
         print("  Windows listo")
     else:
         paso("1-3/5  Saltados: se usa lo que hay en Builds/")
+        codigo = leer_version_code()
+        print("  versionCode del APK: %s" % codigo)
 
     paso("4/5  Empaquetando")
     apk = os.path.join(ESCRITORIO, "CasinoRoyale.apk")

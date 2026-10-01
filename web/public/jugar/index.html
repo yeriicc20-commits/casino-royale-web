@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <script>
+    // Servido como /jugar (sin barra final): que las rutas relativas apunten a /jugar/.
+    if (!/\/$/.test(location.pathname) && !/\.html?$/.test(location.pathname)) document.write('<base href="' + location.pathname + '/">');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Casino Royale">
+  <meta name="theme-color" content="#07080d">
+  <title>Lucky Royale Casino</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <style>
+    html, body { margin: 0; height: 100%; background: #07080d; overflow: hidden; overscroll-behavior: none; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #f3e6c0; }
+    #stage { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+    /* En el movil, pantalla completa. En un PC (pantalla ancha), con forma de movil. */
+    #unity-canvas { width: 100vw; height: 100vh; height: 100dvh; display: block; background: #07080d; outline: none; }
+    @media (min-aspect-ratio: 3/4) {
+      #unity-canvas { height: 100vh; height: 100dvh; width: calc(100dvh * 0.5625); border-left: 1px solid #1b1d29; border-right: 1px solid #1b1d29; }
+    }
+    #loading { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; background: radial-gradient(circle at 50% 40%, #2a1f0c 0%, #07080d 60%); transition: opacity .4s; z-index: 2; }
+    #loading img { width: 112px; height: 112px; border-radius: 26px; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+    #loading h1 { margin: 0; font-size: 26px; letter-spacing: .14em; font-weight: 600; color: #f6d77d; font-family: Georgia, "Times New Roman", serif; }
+    #bar { width: min(260px, 70vw); height: 8px; border-radius: 99px; background: #1d1f2b; overflow: hidden; }
+    #bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #c8961e, #f6d77d); border-radius: 99px; transition: width .2s; }
+    #status { font-size: 14px; color: #9a9cb5; min-height: 1.2em; text-align: center; max-width: 80vw; }
+    #tip { position: fixed; left: 12px; right: 12px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 3; display: none; background: rgba(20,21,31,.96); border: 1px solid #c8961e; border-radius: 16px; padding: 14px 44px 14px 16px; font-size: 15px; line-height: 1.4; box-shadow: 0 8px 30px rgba(0,0,0,.5); }
+    #tip b { color: #f6d77d; }
+    #tip button { position: absolute; top: 6px; right: 6px; width: 34px; height: 34px; border: 0; background: transparent; color: #9a9cb5; font-size: 22px; }
+    #tip svg { width: 18px; height: 18px; vertical-align: -3px; }
+    .err { color: #ff9b8f; }
+  </style>
+</head>
+<body>
+  <div id="stage"><canvas id="unity-canvas" tabindex="-1"></canvas></div>
+  <div id="loading">
+    <img src="icon-192.png" alt="">
+    <h1>CASINO ROYALE</h1>
+    <div id="bar"><i></i></div>
+    <div id="status">Cargando el juego…</div>
+  </div>
+  <div id="tip">
+    <button type="button" aria-label="Cerrar">×</button>
+    Para tenerlo como una app: pulsa <b>Compartir</b>
+    <svg viewBox="0 0 24 24" fill="none" stroke="#f6d77d" stroke-width="2"><path d="M12 3v12M7 8l5-5 5 5M5 12v8h14v-8"/></svg>
+    y después <b>«Añadir a pantalla de inicio»</b>.
+  </div>
+
+  <script src="Build/584e7cecbe03f2db88319812ba7b853c.loader.js"></script>
+  <script>
+    var canvas = document.getElementById('unity-canvas');
+    var loading = document.getElementById('loading');
+    var bar = document.querySelector('#bar i');
+    var status = document.getElementById('status');
+
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var standalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+
+    // En iPhone, explicar como dejarlo como app (solo en Safari y si no esta ya instalado).
+    function showTip() {
+      var seen = false;
+      try { seen = localStorage.getItem('casino-tip') === '1'; } catch (e) {}
+      if (!isIOS || standalone || seen) return;
+      var tip = document.getElementById('tip');
+      tip.style.display = 'block';
+      tip.querySelector('button').onclick = function () {
+        tip.style.display = 'none';
+        try { localStorage.setItem('casino-tip', '1'); } catch (e) {}
+      };
+    }
+
+    var buildUrl = 'Build';
+    var config = {
+      dataUrl: buildUrl + '/1959523c0ea4cd65ddb1d7c0ee8586ff.data.unityweb',
+      frameworkUrl: buildUrl + '/e2e7a88e68d2deb691eaa6819530937a.framework.js.unityweb',
+      codeUrl: buildUrl + '/4fed3d197868129dd37380c0995b91ed.wasm.unityweb',
+      streamingAssetsUrl: 'StreamingAssets',
+      companyName: "Casino Studio",
+      productName: "Lucky Royale Casino",
+      productVersion: "0.1.2",
+      // Con pantallas de 3x el juego iria lento: 2x se ve igual de nitido.
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+      showBanner: function (msg, type) { if (type === 'error') { status.className = 'err'; status.textContent = msg; } }
+    };
+
+    createUnityInstance(canvas, config, function (progress) {
+      bar.style.width = Math.round(progress * 100) + '%';
+      status.textContent = progress < 0.9 ? 'Cargando el juego… ' + Math.round(progress * 100) + '%' : 'Preparando la mesa…';
+    }).then(function () {
+      loading.style.opacity = '0';
+      setTimeout(function () { loading.remove(); showTip(); }, 450);
+    }).catch(function (err) {
+      status.className = 'err';
+      var msg = String(err && err.message || err);
+      status.textContent = /memory|memoria|out of/i.test(msg)
+        ? 'El dispositivo se ha quedado sin memoria. Cierra otras apps y pestañas y vuelve a abrir el juego.'
+        : 'No se ha podido abrir el juego: ' + msg;
+    });
+
+    // Que un toque largo o un doble toque no haga zoom ni seleccione.
+    document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+    canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  </script>
+</body>
+</html>

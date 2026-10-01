@@ -69,20 +69,31 @@ export default async function DownloadPage() {
         </div>
       </Section>
 
-      <Section kicker="iPhone y iPad" title="Por qué iOS funciona distinto">
-        <div className="panel max-w-3xl p-7">
-          <p className="text-sm leading-relaxed text-slate-300">
-            En iPhone y iPad no se puede instalar una aplicación descargando un archivo
-            desde una página web. Apple solo permite instalar desde App Store (o mediante
-            TestFlight para pruebas, y programas de empresa para uso interno).
-          </p>
-          <p className="mt-4 text-sm leading-relaxed text-slate-400">
-            Por eso la tarjeta de iOS no ofrece ninguna descarga directa: lleva a la ficha
-            oficial de App Store, y las actualizaciones llegan por ahí como en cualquier
-            otra aplicación. No es una limitación de este juego, es cómo funciona el
-            sistema, y intentar rodearlo solo daría errores a quien lo intente.
-          </p>
+      <Section kicker="iPhone y iPad" title="Cómo tenerlo en el iPhone (gratis)">
+        <ol className="max-w-3xl space-y-5">
+          {[
+            ['Ábrelo en Safari', 'Pulsa «Jugar en iPhone» desde Safari (tiene que ser Safari, no otro navegador). El juego se carga en unos segundos; la primera vez tarda algo más.'],
+            ['Pulsa Compartir', 'Es el botón del cuadrado con la flecha hacia arriba, abajo en el centro (en iPad, arriba a la derecha).'],
+            ['Añadir a pantalla de inicio', 'Baja en el menú, toca «Añadir a pantalla de inicio» y luego «Añadir». Aparece el icono del casino junto a tus apps.'],
+            ['Juega desde el icono', 'Se abre a pantalla completa, como una app. Tu partida se guarda en el iPhone y, con cuenta, también en el modo online (entra con tu correo y contraseña; si tu cuenta es de Google, ponle contraseña antes en «Mi cuenta» de esta web). Las novedades llegan solas.'],
+          ].map(([title, body], index) => (
+            <li key={title} className="panel flex gap-5 p-6">
+              <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full border border-gold-500/30 bg-gold-500/10 font-display font-bold text-gold-400">
+                {index + 1}
+              </span>
+              <div>
+                <h3 className="heading text-base">{title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
 
+        <div className="panel mt-8 max-w-3xl p-6">
+          <p className="text-sm leading-relaxed text-slate-400">
+            ¿Por qué no está en App Store? Publicar allí cuesta 99 $ al año. La versión web
+            es el mismo juego, gratis, y no necesita instalar nada desde fuera de Safari.
+          </p>
           <Link href="/support" className="btn-ghost mt-6">
             Más preguntas
           </Link>

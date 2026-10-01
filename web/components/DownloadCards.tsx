@@ -1,12 +1,14 @@
 import { formatBytes, PUBLIC_CONFIG } from '@/lib/config';
 import type { Release } from '@/lib/types';
 import { Badge } from '@/components/ui';
+import { WEB_GAME, WEB_GAME_PATH } from '@/lib/webgame';
 
 /**
  * Las tres formas de conseguir el juego.
  *
- * Android y Windows enlazan al binario; iOS enlaza al App Store y NUNCA a un
- * archivo. Esto no es una decisión de diseño, es lo que exige Apple: fuera de
+ * Android y Windows enlazan al binario; iOS enlaza al App Store o, mientras no
+ * este alli, a la version web (/jugar), que se instala con "Anadir a pantalla de
+ * inicio". Nunca a un archivo: Esto no es una decisión de diseño, es lo que exige Apple: fuera de
  * TestFlight y de programas de empresa, un IPA no se instala desde una web, y
  * ofrecer un enlace de descarga directa solo serviría para que la gente se
  * encuentre con un error.
@@ -41,12 +43,22 @@ export function DownloadCards({
       <PlatformCard
         name="iPhone y iPad"
         icon={<AppleIcon />}
-        available={Boolean(iosStoreUrl)}
-        version={undefined}
-        size={null}
-        action={iosStoreUrl ? { label: 'Ver en App Store', href: iosStoreUrl } : null}
-        note="La instalación y las actualizaciones se hacen desde App Store, como marca Apple."
-        pending="La versión para iPhone y iPad todavía no está publicada en App Store."
+        available={Boolean(iosStoreUrl) || WEB_GAME.available}
+        version={iosStoreUrl ? undefined : WEB_GAME.version ?? undefined}
+        size={iosStoreUrl ? null : WEB_GAME.sizeBytes || null}
+        action={
+          iosStoreUrl
+            ? { label: 'Ver en App Store', href: iosStoreUrl }
+            : WEB_GAME.available
+              ? { label: 'Jugar en iPhone', href: WEB_GAME_PATH, sameTab: true }
+              : null
+        }
+        note={
+          iosStoreUrl
+            ? 'La instalación y las actualizaciones se hacen desde App Store, como marca Apple.'
+            : 'Gratis y sin App Store: se abre en Safari y, con «Compartir → Añadir a pantalla de inicio», queda como una app más. Se actualiza solo.'
+        }
+        pending="La versión para iPhone y iPad todavía no está publicada."
       />
 
       <PlatformCard
@@ -84,7 +96,7 @@ function PlatformCard({
   version?: string;
   size?: number | null;
   extra?: string;
-  action: { label: string; href: string; download?: boolean } | null;
+  action: { label: string; href: string; download?: boolean; sameTab?: boolean } | null;
   note: string;
   pending: string;
 }) {
@@ -131,7 +143,7 @@ function PlatformCard({
           {action && (
             <a
               href={action.href}
-              {...(action.download ? { download: '' } : { target: '_blank', rel: 'noopener noreferrer' })}
+              {...(action.download ? { download: '' } : action.sameTab ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
               className="btn-gold mt-6 w-full"
             >
               {action.label}

@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/config';
 import { Badge, Section, Stat } from '@/components/ui';
 import { SignOutButton } from '@/components/SignOutButton';
+import { SetPasswordForm } from '@/components/SetPasswordForm';
 
 export const metadata: Metadata = {
   title: 'Mi cuenta',
@@ -30,6 +31,10 @@ export default async function AccountPage() {
     supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
     supabase.from('player_stats').select('*').eq('user_id', user.id).maybeSingle(),
   ]);
+
+  // Las cuentas hechas solo con Google no tienen contraseña.
+  const providers = (user.app_metadata?.providers as string[] | undefined) ?? [];
+  const hasPassword = providers.includes('email');
 
   return (
     <Section kicker="Tu cuenta" title={profile?.display_name ?? 'Jugador'}>
@@ -87,6 +92,18 @@ export default async function AccountPage() {
             <SignOutButton />
           </div>
         </div>
+      </div>
+
+      <div className="panel mt-8 p-7">
+        <h2 className="heading text-lg">
+          {hasPassword ? 'Contraseña' : 'Ponle contraseña para jugar en iPhone'}
+        </h2>
+        <p className="mt-2 mb-5 max-w-2xl text-sm leading-relaxed text-slate-400">
+          En iPhone y en el navegador el juego no puede abrir el inicio de sesión de Google: se
+          entra con tu correo ({user.email ?? 'el de tu cuenta'}) y una contraseña.
+          {hasPassword ? ' Si quieres, cámbiala aquí.' : ' Tu cuenta aún no tiene: ponla aquí y listo.'}
+        </p>
+        <SetPasswordForm hasPassword={hasPassword} />
       </div>
 
       <div className="panel mt-8 p-7">
