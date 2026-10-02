@@ -34,10 +34,17 @@ export async function POST(request: Request) {
 
   const input = await body<Record<string, unknown>>(request);
 
-  const playerId = await claimIdentity(
-    user.id, text(input.playerId, 64), text(input.name, 16));
-
   const client = db();
+
+  // Si la cuenta ya tiene su fila en el online, se usa ESA. Antes, si el id que
+  // devolvía claimIdentity no coincidía con el de la fila existente, el upsert
+  // chocaba con el índice único de user_id y la presencia fallaba SIEMPRE: el
+  // saldo no se publicaba nunca y el ranking enseñaba 1000 € a todo el mundo.
+  const { data: mine } = await client
+    .from('online_players').select('player_id').eq('user_id', user.id).maybeSingle();
+  const playerId = mine
+    ? String((mine as { player_id: string }).player_id)
+    : await claimIdentity(user.id, text(input.playerId, 64), text(input.name, 16));
 
   let friendCode: string | null = text(input.friendCode, 16).toUpperCase() || null;
 
@@ -106,7 +113,7 @@ export async function POST(request: Request) {
 
   if (error) {
     console.error('[social/presence]', error);
-    return fail('No se pudo publicar la presencia.');
+    return fail('No se pudo publicar la presencia: ' + String(error.message || '').slice(0, 160));
   }
 
   return json({ ok: true, message: '', grants: await claimGrants(client, playerId) });

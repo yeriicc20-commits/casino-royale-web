@@ -23,17 +23,22 @@ export async function globalRows(): Promise<RankRow[]> {
       // '*' y no una lista: así las columnas del pase (título y marco) salen si
       // ya existen, y si aún no se ha ejecutado su SQL no rompen la consulta.
       .select('*')
-      .not('user_id', 'is', null)
       .limit(10000),
     client.from('profiles').select('id, display_name, avatar_index, friend_code, created_at').limit(10000),
   ]);
 
   const byUser = new Map<string, RankRow>();
+  const byPlayer = new Map<string, RankRow>();
   for (const p of (players.data ?? []) as RankRow[]) {
-    if (p.user_id) byUser.set(String(p.user_id), { ...p, balance_cents: Number(p.balance_cents || 0) });
+    const row = { ...p, balance_cents: Number(p.balance_cents || 0) };
+    if (p.user_id) byUser.set(String(p.user_id), row);
+    byPlayer.set(String(p.player_id), row);
   }
   for (const pr of (profiles.data ?? []) as { id: string; display_name: string; avatar_index: number; friend_code: string | null; created_at: string }[]) {
     if (byUser.has(String(pr.id))) continue;
+    // Fila del online con el id de la cuenta como player_id (sin user_id puesto): es suya.
+    const same = byPlayer.get(String(pr.id));
+    if (same) { byUser.set(String(pr.id), { ...same, user_id: String(pr.id), name: same.name || pr.display_name }); continue; }
     byUser.set(String(pr.id), {
       player_id: String(pr.id),
       user_id: String(pr.id),
