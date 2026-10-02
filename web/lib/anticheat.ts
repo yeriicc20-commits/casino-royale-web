@@ -12,6 +12,12 @@ import { db } from '@/lib/online';
 
 /** Lo máximo que se puede ganar en una ronda (apuesta máxima × multiplicador alto). */
 export const MAX_WIN_PER_ROUND_CENTS = 500_000 * 100;
+/**
+ * Lo que puede multiplicar una apuesta como mucho. Las apuestas no tienen tope (se
+ * puede apostar todo el saldo), así que lo que se puede ganar en una ronda depende
+ * del saldo que se tenía, no de una cifra fija.
+ */
+export const MAX_MULTIPLIER = 1000;
 /** Ruleta diaria, regalo, misiones, logros, liga... por cada día. */
 export const BONUS_PER_DAY_CENTS = 50_000 * 100;
 
@@ -48,7 +54,10 @@ export async function impossibleJump(
   if (gained <= 0) return null;
   const rounds = Math.max(0, next.rounds - prev.rounds);
   const days = Math.max(0, (next.at - prev.at) / 86_400_000);
-  let allowed = rounds * MAX_WIN_PER_ROUND_CENTS + BONUS_PER_DAY_CENTS * (1 + days);
+  // Fijo (para saldos pequeños) o proporcional al saldo: apostándolo todo, cada
+  // ronda puede multiplicarlo como mucho por MAX_MULTIPLIER.
+  const compounding = rounds > 0 ? prev.balanceCents * Math.pow(MAX_MULTIPLIER, Math.min(rounds, 3)) : 0;
+  let allowed = Math.max(rounds * MAX_WIN_PER_ROUND_CENTS, compounding) + BONUS_PER_DAY_CENTS * (1 + days);
   if (gained <= allowed) return null;
   allowed += await grantsSince(playerIds, prev.at);
   if (gained <= allowed) return null;

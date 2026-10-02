@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "_info": "Balance del modo competitivo. Todo se puede cambiar aquí sin tocar código: subes la web y listo. Los puntos de rango, el MMR, las fichas y la XP van por separado: las fichas y la XP NO suben el rango.",
+
+  "tiers": [
+    { "id": "ficha",       "name": "FICHA",       "from": 0,    "step": 100, "divisions": 3, "lossFactor": 0.5,  "winFactor": 1.2 },
+    { "id": "jugador",     "name": "JUGADOR",     "from": 300,  "step": 100, "divisions": 3, "lossFactor": 0.75, "winFactor": 1.1 },
+    { "id": "crupier",     "name": "CRUPIER",     "from": 600,  "step": 120, "divisions": 3, "lossFactor": 1,    "winFactor": 1 },
+    { "id": "high_roller", "name": "HIGH ROLLER", "from": 960,  "step": 140, "divisions": 3, "lossFactor": 1,    "winFactor": 1 },
+    { "id": "vip",         "name": "VIP",         "from": 1380, "step": 160, "divisions": 3, "lossFactor": 1,    "winFactor": 1 },
+    { "id": "magnate",     "name": "MAGNATE",     "from": 1860, "step": 180, "divisions": 3, "lossFactor": 1.05, "winFactor": 0.95 },
+    { "id": "propietario", "name": "PROPIETARIO", "from": 2400, "step": 200, "divisions": 3, "lossFactor": 1.1,  "winFactor": 0.9 },
+    { "id": "leyenda",     "name": "LEYENDA DEL CASINO", "from": 3000, "step": 0, "divisions": 1, "lossFactor": 1.2, "winFactor": 0.85 }
+  ],
+
+  "points": {
+    "winMin": 20,
+    "winMax": 30,
+    "lossMin": 15,
+    "lossMax": 25,
+    "draw": 0,
+    "streakFrom": 3,
+    "streakBonus": 3,
+    "streakBonusMax": 9,
+    "abandonExtra": 10,
+    "promotionProtection": { "enabled": true, "matches": 3 },
+    "floor": 0
+  },
+
+  "mmr": {
+    "start": 1000,
+    "kProvisional": 40,
+    "provisionalGames": 10,
+    "k": 24,
+    "min": 100
+  },
+
+  "matchmaking": {
+    "windows": [
+      { "afterSeconds": 0,  "mmr": 50 },
+      { "afterSeconds": 10, "mmr": 100 },
+      { "afterSeconds": 20, "mmr": 150 },
+      { "afterSeconds": 30, "mmr": 250 },
+      { "afterSeconds": 45, "mmr": 400 }
+    ],
+    "casualWindowMmr": 2000,
+    "maxSearchSeconds": 90,
+    "ticketStaleSeconds": 12,
+    "avoidRecentOpponentMinutes": 10,
+    "avoidRecentUntilSeconds": 30
+  },
+
+  "antiAbuse": {
+    "pairRatedPerDay": 3,
+    "maxRatedGapMmr": 700,
+    "rewardedMatchesPerDay": 40
+  },
+
+  "abandon": {
+    "missesToAbandon": 3,
+    "windowHours": 24,
+    "freeAbandons": 2,
+    "banMinutes": 10,
+    "banGrowth": 2,
+    "banMaxMinutes": 240
+  },
+
+  "rewards": {
+    "competitive": { "winCents": 5000, "lossCents": 1500, "drawCents": 2500, "winXp": 120, "lossXp": 50, "drawXp": 80 },
+    "casual":      { "winCents": 1000, "lossCents": 300,  "drawCents": 500,  "winXp": 40,  "lossXp": 20, "drawXp": 30 }
+  },
+
+  "rankRewards": [
+    { "tier": "jugador",     "coinsCents": 5000,   "cosmetics": [],                                     "label": "Primer ascenso a JUGADOR" },
+    { "tier": "crupier",     "coinsCents": 10000,  "cosmetics": ["title_rank_crupier"],                 "label": "Título Crupier" },
+    { "tier": "high_roller", "coinsCents": 25000,  "cosmetics": ["frame_rank_highroller"],              "label": "Marco High Roller" },
+    { "tier": "vip",         "coinsCents": 50000,  "cosmetics": ["title_rank_vip", "emote_rank_vip"],   "label": "Título y emote VIP" },
+    { "tier": "magnate",     "coinsCents": 100000, "cosmetics": ["fx_rank_magnate"],                    "label": "Efecto Magnate" },
+    { "tier": "propietario", "coinsCents": 200000, "cosmetics": ["title_rank_owner", "frame_rank_owner"], "label": "Título y marco Propietario" },
+    { "tier": "leyenda",     "coinsCents": 500000, "cosmetics": ["trophy_rank_legend", "title_rank_legend", "frame_rank_legend"], "label": "Cosméticos legendarios" }
+  ],
+
+  "seasons": {
+    "list": [
+      { "number": 1, "name": "NOCHES DE NEÓN", "start": "2026-10-01T00:00:00+02:00", "days": 42 }
+    ],
+    "defaultDays": 42,
+    "defaultName": "TEMPORADA {n}",
+    "reset": { "pivot": 1000, "keep": 0.65 },
+    "mmrReset": { "pivot": 1100, "keep": 0.8 },
+    "rewards": [
+      { "minTier": "jugador",     "coinsCents": 10000,  "cosmetics": [] },
+      { "minTier": "crupier",     "coinsCents": 25000,  "cosmetics": ["title_season_crupier"] },
+      { "minTier": "high_roller", "coinsCents": 50000,  "cosmetics": ["title_season_highroller"] },
+      { "minTier": "vip",         "coinsCents": 100000, "cosmetics": ["frame_season_vip"] },
+      { "minTier": "magnate",     "coinsCents": 200000, "cosmetics": ["frame_season_vip", "fx_season_magnate"] },
+      { "minTier": "propietario", "coinsCents": 350000, "cosmetics": ["frame_season_vip", "fx_season_magnate", "title_season_owner"] },
+      { "minTier": "leyenda",     "coinsCents": 600000, "cosmetics": ["frame_season_vip", "fx_season_magnate", "title_season_owner", "trophy_season_legend"] }
+    ],
+    "participationMatches": 5,
+    "participation": { "coinsCents": 5000, "cosmetics": ["emote_season_player"] },
+    "topRewards": [
+      { "maxRank": 1,   "coinsCents": 1000000, "cosmetics": ["title_king_casino"] },
+      { "maxRank": 10,  "coinsCents": 300000,  "cosmetics": ["title_top10_season"] },
+      { "maxRank": 100, "coinsCents": 100000,  "cosmetics": ["title_top100_season"] }
+    ]
+  },
+
+  "games": [
+    { "id": "roulette",  "name": "Ruleta",    "machine": "roulette",  "kind": "roulette",  "rounds": 8, "startStack": 1000, "minBet": 10, "decisionSeconds": 20, "playSeconds": 0,  "revealSeconds": 4 },
+    { "id": "blackjack", "name": "Blackjack", "machine": "blackjack", "kind": "blackjack", "rounds": 6, "startStack": 1000, "minBet": 10, "decisionSeconds": 20, "playSeconds": 25, "revealSeconds": 5 },
+    { "id": "dice",      "name": "Dados",     "machine": "dice",      "kind": "dice",      "rounds": 10, "startStack": 1000, "minBet": 10, "decisionSeconds": 15, "playSeconds": 0,  "revealSeconds": 3 }
+  ],
+
+  "ready": { "seconds": 12 },
+  "leaderboardLimit": 100
+}

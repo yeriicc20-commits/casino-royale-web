@@ -93,6 +93,9 @@ hay versiones publicadas" en lugar de dar error. Eso es a propósito.
    - `backend/09_panel_admin.sql` — **cambia el correo de la última línea por el
      tuyo**: es lo que te hace administrador
    - `backend/10_cuentas_en_el_juego.sql` — el online pasa a ir con cuenta
+   - `backend/11_retos_blackjack.sql` — retos de blackjack entre amigos
+   - `backend/12_eventos.sql` — puntos, ranking y premios de los eventos
+   - `backend/13_competitivo.sql` — online 1 contra 1: rangos, emparejamiento, partidas, temporadas
 
    Todos son idempotentes: volver a ejecutarlos no rompe nada. El `07` borra
    todos los jugadores y el `08` es una versión concreta; esos solo cuando
@@ -300,6 +303,54 @@ Lo que **sí** está protegido: nadie puede leer ni escribir la partida de otro.
 tres tablas tienen Row Level Security activado y **cero políticas**, así que con la
 clave pública son invisibles; solo las rutas del servidor, que usan la clave de
 servicio, las tocan.
+
+## 10-ter. Eventos (lo de dentro)
+
+Los horarios no cambian (diario 17:00-18:00, sábado 11:00-14:00). Cada día
+tiene su evento: lunes Racha Mortal, martes Jackpot Rush, miércoles Casino
+Caos, jueves Todo o Nada, viernes High Roller, sábado Casino Royale y domingo
+Caza del Tesoro.
+
+- **Quién calcula:** el servidor (`app/api/live/events`). El juego solo cuenta
+  las rondas que ha jugado EN LÍNEA; puntos, rachas, jackpots, arriesgar y
+  rankings se deciden aquí, con sorteos criptográficos.
+- **Balancear sin programar:** `web/lib/events/config.json` (puntos,
+  multiplicadores, probabilidades, fases, objetivos, premios...). Cambias los
+  números, subes la web y listo: no hace falta publicar el juego.
+- **Premios:** las fichas van por la cola de ajustes (`online_grants`), los
+  cosméticos por `online_event_claims`. Cada premio tiene una llave única, así
+  que no se puede cobrar dos veces.
+- **Opcional:** `EVENTS_SECRET` en Vercel (cualquier texto largo) para sortear
+  la hora del CAOS TOTAL. Si no está, se usa la clave de servicio.
+- **Pruebas del motor:** `npx tsx tests/eventos.test.ts`.
+
+## 10-quater. Online 1 contra 1 (competitivo y casual)
+
+En la sala hay dos tarjetas nuevas: **ONLINE 1 VS 1** y **MI RANGO**. Se elige
+juego (Ruleta, Blackjack o Dados), modo CASUAL o COMPETITIVO y se busca rival.
+Los dos jugadores juegan con la MISMA suerte (misma bola, misma tirada, mismas
+cartas del crupier): gana quien termine con más fichas de partida.
+
+- **Quién calcula:** el servidor (`app/api/online/competitive`). Reparte, decide,
+  suma puntos, MMR, fichas y XP. El juego solo pinta y envía las jugadas.
+- **Rangos:** FICHA, JUGADOR, CRUPIER, HIGH ROLLER, VIP, MAGNATE y PROPIETARIO
+  (cada uno con III, II, I) y LEYENDA DEL CASINO. El MMR está oculto y sirve
+  para emparejar; la ventana de búsqueda se abre con el tiempo (±50, ±100,
+  ±150...) y nunca busca para siempre.
+- **Balancear sin programar:** `web/lib/competitive/config.json` (puntos de cada
+  división, puntos por victoria/derrota, protección al subir, ventanas de
+  emparejamiento, castigos por abandonar, límites anti-granjeo, premios de rango
+  y de fin de temporada, reinicio parcial entre temporadas, rondas de cada juego).
+- **Temporadas:** la 1 es "NOCHES DE NEÓN" (desde el 1-10-2026, 42 días). Al
+  cambiar, los puntos bajan en parte (no a cero) y el rango máximo histórico se
+  guarda siempre.
+- **Seguridad:** ids de partida únicos (MATCH-XXXXXX), cada premio con llave
+  única (no se cobra dos veces), reconexión a la partida a medias, abandono =
+  derrota y bloqueos crecientes si se repite, y límite de partidas puntuadas
+  contra el mismo rival al día.
+- **Pruebas del motor:** `npx tsx tests/competitivo.test.ts`.
+- **En Unity:** menú `Casino/Setup/Reconstruir online competitivo` rehace las
+  pantallas; `Casino/Debug/Online de ejemplo/...` las enseña sin servidor.
 
 ## 11. Conectar Unity
 

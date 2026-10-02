@@ -58,7 +58,8 @@ export async function POST(request: Request) {
     total = rows.length;
   } else {
     // Todas las cuentas registradas, hayan jugado en línea o no.
-    return json(rankingFor(await globalRows(), user.id, LEADERBOARD_LIMIT));
+    // Hasta 1000 filas: en la clasificacion global sale todo el que tiene cuenta.
+    return json(rankingFor(await globalRows(), user.id, Math.max(LEADERBOARD_LIMIT, 1000)));
   }
 
   const entries = rows.map((row, index) => toLeaderboardEntry(row, index + 1));
