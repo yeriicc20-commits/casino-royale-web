@@ -1,4 +1,5 @@
 import { corsPreflight, json } from '@/lib/online';
+import { guardOnlineAccess } from '@/lib/versions';
 
 /**
  * POST /api/system/time
@@ -11,7 +12,12 @@ import { corsPreflight, json } from '@/lib/online';
  */
 export const dynamic = 'force-dynamic';
 
-export async function POST() {
+export async function POST(request: Request) {
+  // Versiones que ya no pueden jugar online (o mantenimiento): ni entrar ni
+  // renovar la sesión. Así el juego viejo se entera al conectar, no a medias.
+  const rejected = await guardOnlineAccess(request);
+  if (rejected) return json(rejected.body, rejected.status);
+
   return json({ utc: new Date().toISOString() });
 }
 

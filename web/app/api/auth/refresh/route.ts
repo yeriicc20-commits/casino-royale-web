@@ -1,5 +1,6 @@
 import { authClient, authFail, sessionPayload, translate } from '@/lib/auth-api';
 import { body, corsPreflight, json } from '@/lib/online';
+import { guardOnlineAccess } from '@/lib/versions';
 
 /**
  * POST /api/auth/refresh   { refreshToken }
@@ -14,6 +15,11 @@ import { body, corsPreflight, json } from '@/lib/online';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  // Versiones que ya no pueden jugar online (o mantenimiento): ni entrar ni
+  // renovar la sesión. Así el juego viejo se entera al conectar, no a medias.
+  const rejected = await guardOnlineAccess(request);
+  if (rejected) return json(rejected.body, rejected.status);
+
   const input = await body<{ refreshToken?: string }>(request);
   const refreshToken = String(input.refreshToken ?? '').trim();
 

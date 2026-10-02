@@ -20,7 +20,9 @@ export async function globalRows(): Promise<RankRow[]> {
   const client = db();
   const [players, profiles] = await Promise.all([
     client.from('online_players')
-      .select('player_id, user_id, name, avatar_id, friend_code, balance_cents, biggest_win_cents, rounds, last_seen')
+      // '*' y no una lista: así las columnas del pase (título y marco) salen si
+      // ya existen, y si aún no se ha ejecutado su SQL no rompen la consulta.
+      .select('*')
       .not('user_id', 'is', null)
       .limit(10000),
     client.from('profiles').select('id, display_name, avatar_index, friend_code, created_at').limit(10000),

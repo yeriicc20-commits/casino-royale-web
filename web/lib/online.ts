@@ -95,6 +95,9 @@ export interface PlayerRow {
   biggest_win_cents: number;
   rounds: number;
   last_seen: string;
+  /** Cosméticos que lleva puestos (columnas de 14_pase_temporada.sql; pueden no existir aún). */
+  title_id?: string | null;
+  frame_id?: string | null;
 }
 
 /** Convierte una fila en la entrada de clasificación que espera el juego. */
@@ -105,6 +108,8 @@ export function toLeaderboardEntry(row: PlayerRow, rank: number) {
     name: row.name,
     avatarId: row.avatar_id,
     valueCents: row.balance_cents,
+    titleId: row.title_id ?? '',
+    frameId: row.frame_id ?? '',
   };
 }
 

@@ -76,7 +76,7 @@ export async function POST(request: Request) {
     }
 
     if (typeof body.avatarIndex === 'number') {
-      update.avatar_index = Math.max(0, Math.min(15, Math.floor(body.avatarIndex)));
+      update.avatar_index = Math.max(0, Math.min(63, Math.floor(body.avatarIndex)));
     }
 
     if (Object.keys(update).length > 0) {

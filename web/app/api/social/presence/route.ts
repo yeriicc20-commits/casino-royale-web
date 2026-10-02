@@ -63,6 +63,14 @@ export async function POST(request: Request) {
     last_seen: new Date().toISOString(),
   };
 
+  // Lo que lleva puesto (pase de temporada): título y marco, para el ranking.
+  // Solo ids cortos con letras, números y guion bajo.
+  const cosmetic = (v: unknown) => {
+    const s = text(v, 40);
+    return /^[a-z0-9_]*$/.test(s) ? s : '';
+  };
+  const looks: Record<string, unknown> = { title_id: cosmetic(input.titleId), frame_id: cosmetic(input.frameId) };
+
   // Saldo imposible para el podio (juego modificado): se queda el de antes.
   const { data: before } = await client
     .from('online_players')
@@ -86,9 +94,15 @@ export async function POST(request: Request) {
   // upsert borraría el que ya tuviera guardado.
   if (friendCode) row.friend_code = friendCode;
 
-  const { error } = await client
+  let { error } = await client
     .from('online_players')
-    .upsert(row, { onConflict: 'player_id' });
+    .upsert({ ...row, ...looks }, { onConflict: 'player_id' });
+
+  // Sin las columnas del pase (falta ejecutar 14_pase_temporada.sql): se publica
+  // igual, sin título ni marco. El ranking no puede dejar de funcionar por esto.
+  if (error && /title_id|frame_id|column/i.test(String(error.message || ''))) {
+    ({ error } = await client.from('online_players').upsert(row, { onConflict: 'player_id' }));
+  }
 
   if (error) {
     console.error('[social/presence]', error);

@@ -1,5 +1,6 @@
 import { authFail, supabaseUrl } from '@/lib/auth-api';
 import { body, corsPreflight, json, text } from '@/lib/online';
+import { guardOnlineAccess } from '@/lib/versions';
 
 /**
  * POST /api/auth/oauth/start   { provider, redirect, challenge }
@@ -22,6 +23,11 @@ export const dynamic = 'force-dynamic';
 const ALLOWED = new Set(['google', 'apple']);
 
 export async function POST(request: Request) {
+  // Versiones que ya no pueden jugar online (o mantenimiento): ni entrar ni
+  // renovar la sesión. Así el juego viejo se entera al conectar, no a medias.
+  const rejected = await guardOnlineAccess(request);
+  if (rejected) return json(rejected.body, rejected.status);
+
   const input = await body<{ provider?: string; redirect?: string; challenge?: string }>(request);
 
   const provider = text(input.provider, 16).toLowerCase();
