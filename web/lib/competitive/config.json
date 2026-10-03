@@ -109,7 +109,8 @@
   "games": [
     { "id": "roulette",  "name": "Ruleta",    "machine": "roulette",  "kind": "roulette",  "rounds": 8, "startStack": 1000, "minBet": 10, "decisionSeconds": 20, "playSeconds": 0,  "revealSeconds": 4 },
     { "id": "blackjack", "name": "Blackjack", "machine": "blackjack", "kind": "blackjack", "rounds": 6, "startStack": 1000, "minBet": 10, "decisionSeconds": 20, "playSeconds": 25, "revealSeconds": 5 },
-    { "id": "dice",      "name": "Dados",     "machine": "dice",      "kind": "dice",      "rounds": 10, "startStack": 1000, "minBet": 10, "decisionSeconds": 15, "playSeconds": 0,  "revealSeconds": 3 }
+    { "id": "dice",      "name": "Dados",     "machine": "dice",      "kind": "dice",      "rounds": 10, "startStack": 1000, "minBet": 10, "decisionSeconds": 15, "playSeconds": 0,  "revealSeconds": 4 },
+    { "id": "poker",     "name": "Póker",     "machine": "holdem",    "kind": "poker",     "rounds": 8, "startStack": 1000, "minBet": 10, "decisionSeconds": 20, "playSeconds": 20, "revealSeconds": 7 }
   ],
 
   "ready": { "seconds": 12 },

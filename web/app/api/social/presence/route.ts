@@ -77,6 +77,10 @@ export async function POST(request: Request) {
     return /^[a-z0-9_]*$/.test(s) ? s : '';
   };
   const looks: Record<string, unknown> = { title_id: cosmetic(input.titleId), frame_id: cosmetic(input.frameId) };
+  // En que maquina esta (panel en vivo). Va con "looks" para que, si falta la
+  // columna (15_panel_vivo.sql sin ejecutar), el reintento de abajo la quite.
+  const game = text(input.game, 24).toLowerCase();
+  if (/^[a-z0-9_]+$/.test(game)) looks.playing = game;
 
   // Saldo imposible para el podio (juego modificado): se queda el de antes.
   const { data: before } = await client
@@ -84,6 +88,7 @@ export async function POST(request: Request) {
     .select('balance_cents, rounds, last_seen')
     .eq('player_id', playerId)
     .maybeSingle();
+  let flagged: string | null = null;
   if (before) {
     const why = await impossibleJump(
       { balanceCents: Number(before.balance_cents || 0), rounds: Number(before.rounds || 0), at: Date.parse(String(before.last_seen)) || Date.now() },
@@ -91,6 +96,7 @@ export async function POST(request: Request) {
       [playerId],
     );
     if (why) {
+      flagged = why;
       console.warn('[social/presence] saldo ignorado', playerId, why);
       row.balance_cents = Number(before.balance_cents || 0);
       row.rounds = Number(before.rounds || 0);
@@ -107,7 +113,7 @@ export async function POST(request: Request) {
 
   // Sin las columnas del pase (falta ejecutar 14_pase_temporada.sql): se publica
   // igual, sin título ni marco. El ranking no puede dejar de funcionar por esto.
-  if (error && /title_id|frame_id|column/i.test(String(error.message || ''))) {
+  if (error && /title_id|frame_id|playing|column/i.test(String(error.message || ''))) {
     ({ error } = await client.from('online_players').upsert(row, { onConflict: 'player_id' }));
   }
 
@@ -116,7 +122,48 @@ export async function POST(request: Request) {
     return fail('No se pudo publicar la presencia: ' + String(error.message || '').slice(0, 160));
   }
 
+  await logActivity(client, playerId, before, row, flagged, game);
+
   return json({ ok: true, message: '', grants: await claimGrants(client, playerId) });
+}
+
+/**
+ * Historial para el panel en vivo: cada vez que cambia el saldo (o las rondas)
+ * se apunta cuanto, con cuantas rondas y en que maquina. Asi se ve si alguien
+ * sube dinero sin jugar o mas rapido de lo posible. Si la tabla no existe
+ * (15_panel_vivo.sql sin ejecutar) no pasa nada: la presencia sigue igual.
+ */
+async function logActivity(
+  client: ReturnType<typeof db>,
+  playerId: string,
+  before: { balance_cents?: unknown; rounds?: unknown } | null,
+  row: Record<string, unknown>,
+  flagged: string | null,
+  game: string,
+) {
+  try {
+    const bal = Number(row.balance_cents || 0);
+    const rounds = Number(row.rounds || 0);
+    const prevBal = before ? Number(before.balance_cents || 0) : bal;
+    const prevRounds = before ? Number(before.rounds || 0) : rounds;
+    const delta = bal - prevBal;
+    const roundsDelta = Math.max(0, rounds - prevRounds);
+    if (before && delta === 0 && roundsDelta === 0 && !flagged) return;
+    let note = flagged;
+    if (!note && before && delta > 0 && roundsDelta === 0) note = 'Sube sin jugar (¿ajuste del panel o regalo?)';
+    const { error } = await client.from('online_activity').insert({
+      player_id: playerId,
+      balance_cents: bal,
+      delta_cents: delta,
+      rounds,
+      rounds_delta: roundsDelta,
+      game: /^[a-z0-9_]+$/.test(game) ? game : null,
+      flag: note,
+    });
+    if (error && !/online_activity/.test(String(error.message || ''))) console.error('[social/presence] actividad', error.message);
+  } catch {
+    /* el historial nunca tumba la presencia */
+  }
 }
 
 /** Una fila de la cola de ajustes, ya marcada como entregada. */

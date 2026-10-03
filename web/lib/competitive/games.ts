@@ -13,7 +13,8 @@
  * Añadir un juego = escribir un módulo aquí y una línea en config.json. El
  * emparejamiento, el rango, el MMR, las temporadas y los premios no cambian.
  */
-import { handValue, isBlackjack } from '@/lib/duel';
+import { handValue, isBlackjack, winnerOf } from '@/lib/duel';
+import { bestHand, compareHands } from './poker';
 import type { Bet, BjHand, GameDef, MatchState, Side } from './types';
 
 export type Rng = () => number;
@@ -43,6 +44,23 @@ function amountOf(raw: Partial<Bet>, stack: number, def: GameDef): number | stri
 }
 
 const randInt = (rng: Rng, n: number) => Math.min(n - 1, Math.floor(rng() * n));
+
+/**
+ * Cara a cara: lo que se juegan los dos es lo que apuesta el MÁS PRUDENTE (el
+ * menor de las dos apuestas). Las fichas pasan de uno a otro; no hay casa.
+ * Deja las dos apuestas en esa cantidad. 0 = alguien pasó y no hay duelo.
+ */
+function matchStake(st: MatchState): number {
+  const a = st.bets.a?.amount ?? 0;
+  const b = st.bets.b?.amount ?? 0;
+  const stake = Math.max(0, Math.min(a, b));
+  if (st.bets.a) st.bets.a.amount = stake;
+  if (st.bets.b) st.bets.b.amount = stake;
+  return stake;
+}
+
+const noDuel = (): { outcome: string; a: Settle; b: Settle } =>
+  ({ outcome: 'Sin duelo', a: { delta: 0, detail: 'Alguien pasó: no se juega' }, b: { delta: 0, detail: 'Alguien pasó: no se juega' } });
 
 // ---------------------------------------------------------------------------- ruleta
 
@@ -97,24 +115,24 @@ const roulette: GameModule = {
 const dice: GameModule = {
   validate(raw, stack, def) {
     const amount = amountOf(raw, stack, def);
-    if (typeof amount === 'string') return amount;
-    const chance = Math.round(Number(raw.chance));
-    if (!Number.isFinite(chance) || chance < 5 || chance > 95) return 'La probabilidad va del 5 al 95 %.';
-    return { amount, chance };
+    return typeof amount === 'string' ? amount : { amount };
   },
   start() { return false; },
   resolve(st, rng) {
-    // Una sola tirada para los dos, de 0,00 a 99,99. Gana quien la tenga por debajo de su probabilidad.
-    const roll = randInt(rng, 10000) / 100;
-    const one = (bet: Bet | null): Settle => {
-      if (!bet || bet.amount <= 0) return { delta: 0, detail: 'Sin apuesta' };
-      const chance = bet.chance ?? 50;
-      const win = roll < chance;
-      // Justo: paga 100/probabilidad (sin ventaja de la casa, que aquí no hay casa).
-      const delta = win ? Math.floor(bet.amount * (100 / chance - 1)) : -bet.amount;
-      return { delta, detail: 'Menos de ' + chance + (win ? ' ¡acierta!' : ' falla') };
+    // Cara a cara: cada uno tira dos dados; la suma más alta se lleva lo apostado.
+    const stake = matchStake(st);
+    if (stake <= 0) return noDuel();
+    const da = [1 + randInt(rng, 6), 1 + randInt(rng, 6)];
+    const db = [1 + randInt(rng, 6), 1 + randInt(rng, 6)];
+    const sa = da[0] + da[1];
+    const sb = db[0] + db[1];
+    const d = sa > sb ? stake : sa < sb ? -stake : 0;
+    const word = (x: number) => (x > 0 ? '¡ganas!' : x < 0 ? 'pierdes' : 'empate');
+    return {
+      outcome: sa + ' contra ' + sb,
+      a: { delta: d, detail: 'Sacas ' + sa + ' (' + da[0] + '+' + da[1] + ') · rival ' + sb + ' · ' + word(d) },
+      b: { delta: -d, detail: 'Sacas ' + sb + ' (' + db[0] + '+' + db[1] + ') · rival ' + sa + ' · ' + word(-d) },
     };
-    return { outcome: roll.toFixed(2).replace('.', ','), a: one(st.bets.a), b: one(st.bets.b) };
   },
 };
 
@@ -141,25 +159,21 @@ const blackjack: GameModule = {
     return typeof amount === 'string' ? amount : { amount };
   },
   start(st, rng) {
-    // Dos montones: el del crupier y el de los jugadores. Los dos jugadores sacan del
-    // MISMO montón (cada uno su copia): mismas cartas iniciales y, si piden, las mismas
-    // siguientes. Las decisiones son lo único que cambia.
+    // Cara a cara y sin crupier: cada uno su mano, del mismo mazo (cartas distintas).
+    const stake = matchStake(st);
+    if (stake <= 0) { st.bj = null; return false; }
     const deck = shuffled(rng);
-    const dealerPile = deck.slice(0, 20);
-    const pile = deck.slice(20, 40);
-    const first = [pile[0], pile[1]];
-    const hand = (side: Side): BjHand => {
-      const bet = st.bets[side];
-      if (!bet || bet.amount <= 0) return emptyHand();
-      return { cards: [...first], done: isBlackjack(first), doubled: false };
-    };
     st.bj = {
-      dealer: [dealerPile[0], dealerPile[1]],
-      dealerPile: dealerPile.slice(2),
-      pile,
-      hands: { a: hand('a'), b: hand('b') },
-      draws: { a: 2, b: 2 },
+      dealer: [],
+      dealerPile: [],
+      pile: deck,
+      hands: {
+        a: { cards: [deck[0], deck[2]], done: false, doubled: false },
+        b: { cards: [deck[1], deck[3]], done: false, doubled: false },
+      },
+      draws: { a: 4, b: 4 },
     };
+    for (const s of ['a', 'b'] as Side[]) if (isBlackjack(st.bj.hands[s].cards)) st.bj.hands[s].done = true;
     return !(st.bj.hands.a.done && st.bj.hands.b.done);
   },
   act(st, side, action) {
@@ -167,20 +181,16 @@ const blackjack: GameModule = {
     if (!bj) return 'No hay mano.';
     const h = bj.hands[side];
     if (h.done) return 'Ya has terminado tu mano.';
-    const draw = () => { h.cards.push(bj.pile[bj.draws[side]]); bj.draws[side]++; };
     if (action === 'hit') {
-      draw();
+      // Cada uno saca de su mitad del mazo: lo que pida uno no cambia las cartas del otro.
+      const offset = side === 'a' ? 0 : 50;
+      h.cards.push(bj.pile[offset + bj.draws[side]]);
+      bj.draws[side]++;
       if (handValue(h.cards) >= 21) h.done = true;
     } else if (action === 'stand') {
       h.done = true;
     } else if (action === 'double') {
-      const bet = st.bets[side]!;
-      if (h.cards.length !== 2) return 'Solo se dobla con dos cartas.';
-      if (bet.amount * 2 > st.stacks[side]) return 'No tienes fichas para doblar.';
-      bet.amount *= 2;
-      h.doubled = true;
-      draw();
-      h.done = true;
+      return 'En el cara a cara no se dobla.';
     } else {
       return 'Acción desconocida.';
     }
@@ -193,30 +203,96 @@ const blackjack: GameModule = {
     return !st.bj || st.bj.hands[side].done;
   },
   resolve(st) {
-    const bj = st.bj!;
-    // El crupier pide hasta 17 (se planta en 17 blando), del SUYO montón.
-    let k = 0;
-    while (handValue(bj.dealer) < 17) bj.dealer.push(bj.dealerPile[k++]);
-    const dv = handValue(bj.dealer);
-    const dealerBj = isBlackjack(bj.dealer);
-    const one = (side: Side): Settle => {
-      const bet = st.bets[side];
-      const h = bj.hands[side];
-      if (!bet || bet.amount <= 0 || !h.cards.length) return { delta: 0, detail: 'Sin apuesta' };
-      const pv = handValue(h.cards);
-      const pbj = isBlackjack(h.cards);
-      if (pv > 21) return { delta: -bet.amount, detail: pv + ' · te pasas' };
-      if (pbj && !dealerBj) return { delta: Math.floor(bet.amount * 1.5), detail: '¡BLACKJACK!' };
-      if (dealerBj && !pbj) return { delta: -bet.amount, detail: 'Blackjack del crupier' };
-      if (dv > 21 || pv > dv) return { delta: bet.amount, detail: pv + ' gana a ' + dv };
-      if (pv === dv) return { delta: 0, detail: 'Empate a ' + pv };
-      return { delta: -bet.amount, detail: pv + ' pierde con ' + dv };
+    const bj = st.bj;
+    if (!bj) return noDuel();
+    const stake = st.bets.a?.amount ?? 0;
+    const ca = bj.hands.a.cards;
+    const cb = bj.hands.b.cards;
+    const va = handValue(ca);
+    const vb = handValue(cb);
+    const w = winnerOf(ca, cb);
+    const d = w === 'challenger' ? stake : w === 'opponent' ? -stake : 0;
+    const show = (v: number, cards: string[]) => (isBlackjack(cards) ? 'BLACKJACK' : v > 21 ? v + ' (te pasas)' : String(v));
+    const word = (x: number) => (x > 0 ? '¡ganas!' : x < 0 ? 'pierdes' : 'empate');
+    return {
+      outcome: va + ' contra ' + vb,
+      a: { delta: d, detail: show(va, ca) + ' contra ' + show(vb, cb) + ' · ' + word(d) },
+      b: { delta: -d, detail: show(vb, cb) + ' contra ' + show(va, ca) + ' · ' + word(-d) },
     };
-    return { outcome: 'Crupier ' + dv, a: one('a'), b: one('b') };
   },
 };
 
-const MODULES: Record<string, GameModule> = { roulette, dice, blackjack };
+// ---------------------------------------------------------------------------- póker
+
+/**
+ * Póker cara a cara (Texas Hold'em a una apuesta):
+ *   1. Los dos ponen la misma ciega (la menor de las dos apuestas).
+ *   2. Cada uno ve sus 2 cartas y el flop (3 de la mesa).
+ *   3. Decide a la vez: SUBIR (pone otra ciega) o RETIRARSE.
+ *      - Uno se retira y el otro sube: el que sube se lleva la ciega del otro.
+ *      - Los dos se retiran: nadie gana nada.
+ *      - Los dos suben: se ven las 5 cartas y la mejor jugada se lleva el doble.
+ * Para poder subir, la ciega no puede pasar de la mitad de tus fichas.
+ */
+const poker: GameModule = {
+  validate(raw, stack, def) {
+    const amount = amountOf(raw, stack, def);
+    if (typeof amount === 'string') return amount;
+    if (amount * 2 > stack) return 'En póker la ciega es como mucho la mitad de tus fichas (para poder subir).';
+    return { amount };
+  },
+  start(st, rng) {
+    const stake = matchStake(st);
+    if (stake <= 0) { st.pk = null; return false; }
+    const deck = shuffled(rng);
+    st.pk = { hole: { a: [deck[0], deck[2]], b: [deck[1], deck[3]] }, board: deck.slice(4, 9), choice: { a: '', b: '' } };
+    return true;
+  },
+  act(st, side, action) {
+    if (!st.pk) return 'No hay mano.';
+    if (st.pk.choice[side]) return 'Ya has decidido.';
+    if (action !== 'raise' && action !== 'fold') return 'Acción desconocida.';
+    st.pk.choice[side] = action;
+    return null;
+  },
+  autoPlay(st, side) {
+    // Sin contestar a tiempo: se retira (como en una mesa de verdad).
+    if (st.pk && !st.pk.choice[side]) st.pk.choice[side] = 'fold';
+  },
+  playDone(st, side) {
+    return !st.pk || !!st.pk.choice[side];
+  },
+  resolve(st) {
+    const pk = st.pk;
+    if (!pk) return noDuel();
+    const stake = st.bets.a?.amount ?? 0;
+    const ra = pk.choice.a === 'raise';
+    const rb = pk.choice.b === 'raise';
+    const ha = bestHand([...pk.hole.a, ...pk.board]);
+    const hb = bestHand([...pk.hole.b, ...pk.board]);
+    if (!ra && !rb) {
+      return { outcome: 'Los dos se retiran', a: { delta: 0, detail: 'Os retiráis los dos' }, b: { delta: 0, detail: 'Os retiráis los dos' } };
+    }
+    if (ra !== rb) {
+      const d = ra ? stake : -stake;
+      return {
+        outcome: ra ? 'B se retira' : 'A se retira',
+        a: { delta: d, detail: ra ? 'El rival se retira · ¡ganas su ciega!' : 'Te retiras · pierdes la ciega' },
+        b: { delta: -d, detail: rb ? 'El rival se retira · ¡ganas su ciega!' : 'Te retiras · pierdes la ciega' },
+      };
+    }
+    const c = compareHands(ha, hb);
+    const d = c > 0 ? stake * 2 : c < 0 ? -stake * 2 : 0;
+    const word = (x: number) => (x > 0 ? '¡ganas!' : x < 0 ? 'pierdes' : 'empate');
+    return {
+      outcome: ha.name + ' contra ' + hb.name,
+      a: { delta: d, detail: ha.name + ' contra ' + hb.name + ' · ' + word(d) },
+      b: { delta: -d, detail: hb.name + ' contra ' + ha.name + ' · ' + word(-d) },
+    };
+  },
+};
+
+const MODULES: Record<string, GameModule> = { roulette, dice, blackjack, poker };
 
 export function moduleFor(def: GameDef): GameModule {
   const m = MODULES[def.kind];

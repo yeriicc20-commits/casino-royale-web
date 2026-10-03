@@ -41,9 +41,13 @@ export async function POST(request: Request) {
   // Solo las dos formas que el juego sabe recoger: el enlace propio de Android
   // y el servidor local del PC. Cualquier otra sería una puerta abierta para
   // mandar la sesión de alguien a donde no debe.
+  // La version web (iPhone/PC en el navegador) vuelve a su propia pagina del
+  // juego, en este mismo dominio: /jugar/.
+  const origin = new URL(request.url).origin;
   const safe =
     redirect.startsWith('casinoroyale://') ||
-    /^http:\/\/127\.0\.0\.1:\d{4,5}\//.test(redirect);
+    /^http:\/\/127\.0\.0\.1:\d{4,5}\//.test(redirect) ||
+    redirect.startsWith(origin + '/jugar');
 
   if (!safe) return authFail('Esa dirección de vuelta no está permitida.');
 
@@ -52,6 +56,9 @@ export async function POST(request: Request) {
   url.searchParams.set('redirect_to', redirect);
   url.searchParams.set('code_challenge', challenge);
   url.searchParams.set('code_challenge_method', 's256');
+  // Que Google ensene siempre el selector con las cuentas del movil/PC, en vez
+  // de entrar callado con la ultima o pedir escribir el correo.
+  if (provider === 'google') url.searchParams.set('prompt', 'select_account');
 
   return json({ ok: true, message: '', url: url.toString() });
 }

@@ -14,7 +14,7 @@ export interface GameDef {
   id: string;
   name: string;
   machine: string;
-  kind: 'roulette' | 'blackjack' | 'dice';
+  kind: 'roulette' | 'blackjack' | 'dice' | 'poker';
   rounds: number;
   startStack: number;
   minBet: number;
@@ -83,7 +83,7 @@ export interface RoundLog {
   outcome: string;
   a: { bet: number; delta: number; detail: string };
   b: { bet: number; delta: number; detail: string };
-  cards?: { dealer: string[]; a: string[]; b: string[] };
+  cards?: { dealer: string[]; a: string[]; b: string[]; board?: string[] };
   bets?: { a: Bet | null; b: Bet | null };
 }
 
@@ -103,6 +103,8 @@ export interface MatchState {
   misses: { a: number; b: number };
   seen: { a: number; b: number };
   bj: { dealer: string[]; pile: string[]; dealerPile: string[]; hands: { a: BjHand; b: BjHand }; draws: { a: number; b: number } } | null;
+  /** Póker cara a cara: cartas de cada uno, las 5 de la mesa y lo que decide cada uno. */
+  pk?: { hole: { a: string[]; b: string[] }; board: string[]; choice: { a: string; b: string } } | null;
   history: RoundLog[];
   startedAt: number;
   endedAt: number;

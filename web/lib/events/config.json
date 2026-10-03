@@ -1,16 +1,21 @@
 {
   "version": 1,
   "_info": "Balance de los eventos. Se puede cambiar sin tocar codigo: edita los numeros, sube la web y el juego lo recoge en la siguiente consulta (no hace falta publicar una version nueva del juego). Los horarios estan en 'schedule' y son los mismos que ya usa el juego (EventSchedule.cs): no se cambian aqui.",
-
   "schedule": {
     "timeZone": "Europe/Madrid",
-    "daily": { "opens": "17:00", "closes": "18:00" },
-    "weekly": { "weekday": 6, "opens": "11:00", "closes": "14:00" },
+    "daily": {
+      "opens": "17:00",
+      "closes": "18:00"
+    },
+    "weekly": {
+      "weekday": 6,
+      "opens": "11:00",
+      "closes": "14:00"
+    },
     "submitGraceSeconds": 120,
     "claimAfterSeconds": 150,
     "claimWindowDays": 14
   },
-
   "dailyByWeekday": {
     "1": "racha_mortal",
     "2": "jackpot_rush",
@@ -21,14 +26,34 @@
     "0": "caza_tesoro"
   },
   "weeklyEvent": "casino_royale",
-
-  "machines": ["slots", "blackjack", "roulette", "videopoker", "holdem", "baccarat", "crash", "mines", "plinko", "dice", "hilo", "keno", "scratch", "horses", "tute"],
+  "machines": [
+    "slots",
+    "blackjack",
+    "roulette",
+    "holdem",
+    "crash",
+    "mines",
+    "plinko",
+    "horses",
+    "tute"
+  ],
   "machineNames": {
-    "slots": "Tragaperras", "blackjack": "Blackjack", "roulette": "Ruleta", "videopoker": "Video Póker",
-    "holdem": "Póker", "baccarat": "Bacarrá", "crash": "Crash", "mines": "Minas", "plinko": "Plinko", "horses": "Carreras de caballos", "tute": "Tute",
-    "dice": "Dados", "hilo": "Mayor o menor", "keno": "Keno", "scratch": "Rasca y gana"
+    "slots": "Tragaperras",
+    "blackjack": "Blackjack",
+    "roulette": "Ruleta",
+    "videopoker": "Video Póker",
+    "holdem": "Póker",
+    "baccarat": "Bacarrá",
+    "crash": "Crash",
+    "mines": "Minas",
+    "plinko": "Plinko",
+    "horses": "Carreras de caballos",
+    "tute": "Tute",
+    "dice": "Dados",
+    "hilo": "Mayor o menor",
+    "keno": "Keno",
+    "scratch": "Rasca y gana"
   },
-
   "limits": {
     "minStakeCents": 25,
     "maxRoundsPerReport": 80,
@@ -37,13 +62,29 @@
     "maxQueuedSeconds": 900,
     "modifierLookbackSeconds": 60
   },
-
   "jackpotTiers": [
-    { "id": "mini",  "name": "MINI JACKPOT",  "chance": 0.03,   "points": 500,  "coinsCents": 5000 },
-    { "id": "mega",  "name": "MEGA JACKPOT",  "chance": 0.004,  "points": 2000, "coinsCents": 50000 },
-    { "id": "ultra", "name": "ULTRA JACKPOT", "chance": 0.0004, "points": 6000, "coinsCents": 500000 }
+    {
+      "id": "mini",
+      "name": "MINI JACKPOT",
+      "chance": 0.03,
+      "points": 500,
+      "coinsCents": 5000
+    },
+    {
+      "id": "mega",
+      "name": "MEGA JACKPOT",
+      "chance": 0.004,
+      "points": 2000,
+      "coinsCents": 50000
+    },
+    {
+      "id": "ultra",
+      "name": "ULTRA JACKPOT",
+      "chance": 0.0004,
+      "points": 6000,
+      "coinsCents": 500000
+    }
   ],
-
   "events": {
     "racha_mortal": {
       "name": "Racha Mortal",
@@ -60,30 +101,79 @@
         "streakStepPoints": 50,
         "breakOnLoss": true,
         "milestones": [
-          { "streak": 3,  "points": 300,  "label": "BONUS PEQUEÑO" },
-          { "streak": 5,  "points": 800,  "label": "BONUS MEDIO" },
-          { "streak": 10, "points": 2500, "label": "GRAN BONUS" },
-          { "streak": 15, "points": 5000, "label": "BONUS ESPECIAL" }
+          {
+            "streak": 3,
+            "points": 300,
+            "label": "BONUS PEQUEÑO"
+          },
+          {
+            "streak": 5,
+            "points": 800,
+            "label": "BONUS MEDIO"
+          },
+          {
+            "streak": 10,
+            "points": 2500,
+            "label": "GRAN BONUS"
+          },
+          {
+            "streak": 15,
+            "points": 5000,
+            "label": "BONUS ESPECIAL"
+          }
         ],
         "streakMultiplierFrom": 20,
         "streakMultiplier": 2
       },
       "jackpotScale": 0,
       "rewards": [
-        { "id": "top1",   "fromRank": 1,  "toRank": 1,   "label": "TOP 1",   "coinsCents": 150000, "cosmetics": ["title_racha_mortal"] },
-        { "id": "top10",  "fromRank": 2,  "toRank": 10,  "label": "TOP 10",  "coinsCents": 50000,  "cosmetics": [] },
-        { "id": "top50",  "fromRank": 11, "toRank": 50,  "label": "TOP 50",  "coinsCents": 15000,  "cosmetics": [] },
-        { "id": "part",   "participation": true, "minRounds": 10, "label": "PARTICIPACIÓN", "coinsCents": 2500, "cosmetics": [] }
+        {
+          "id": "top1",
+          "fromRank": 1,
+          "toRank": 1,
+          "label": "TOP 1",
+          "coinsCents": 150000,
+          "cosmetics": [
+            "title_racha_mortal"
+          ]
+        },
+        {
+          "id": "top10",
+          "fromRank": 2,
+          "toRank": 10,
+          "label": "TOP 10",
+          "coinsCents": 50000,
+          "cosmetics": []
+        },
+        {
+          "id": "top50",
+          "fromRank": 11,
+          "toRank": 50,
+          "label": "TOP 50",
+          "coinsCents": 15000,
+          "cosmetics": []
+        },
+        {
+          "id": "part",
+          "participation": true,
+          "minRounds": 10,
+          "label": "PARTICIPACIÓN",
+          "coinsCents": 2500,
+          "cosmetics": []
+        }
       ]
     },
-
     "jackpot_rush": {
       "name": "Jackpot Rush",
       "kind": "jackpot",
       "tagline": "Lluvia de jackpots",
       "description": "Cada partida tiene premio extra: el servidor sortea un MINI, MEGA o ULTRA JACKPOT en cada ronda. Cuantos más consigas, más arriba estarás.",
       "rankBy": "points",
-      "rankSorts": ["points", "jackpots", "best"],
+      "rankSorts": [
+        "points",
+        "jackpots",
+        "best"
+      ],
       "scoring": {
         "winPoints": 60,
         "lossPoints": 0,
@@ -96,13 +186,42 @@
       },
       "jackpotScale": 1,
       "rewards": [
-        { "id": "top1",  "fromRank": 1,  "toRank": 1,  "label": "TOP 1",  "coinsCents": 150000, "cosmetics": ["title_jackpot_hunter"] },
-        { "id": "top10", "fromRank": 2,  "toRank": 10, "label": "TOP 10", "coinsCents": 50000,  "cosmetics": [] },
-        { "id": "top50", "fromRank": 11, "toRank": 50, "label": "TOP 50", "coinsCents": 15000,  "cosmetics": [] },
-        { "id": "part",  "participation": true, "minRounds": 10, "label": "PARTICIPACIÓN", "coinsCents": 2500, "cosmetics": [] }
+        {
+          "id": "top1",
+          "fromRank": 1,
+          "toRank": 1,
+          "label": "TOP 1",
+          "coinsCents": 150000,
+          "cosmetics": [
+            "title_jackpot_hunter"
+          ]
+        },
+        {
+          "id": "top10",
+          "fromRank": 2,
+          "toRank": 10,
+          "label": "TOP 10",
+          "coinsCents": 50000,
+          "cosmetics": []
+        },
+        {
+          "id": "top50",
+          "fromRank": 11,
+          "toRank": 50,
+          "label": "TOP 50",
+          "coinsCents": 15000,
+          "cosmetics": []
+        },
+        {
+          "id": "part",
+          "participation": true,
+          "minRounds": 10,
+          "label": "PARTICIPACIÓN",
+          "coinsCents": 2500,
+          "cosmetics": []
+        }
       ]
     },
-
     "casino_caos": {
       "name": "Casino Caos",
       "kind": "chaos",
@@ -118,33 +237,149 @@
         "streakStepPoints": 30,
         "breakOnLoss": true,
         "milestones": [
-          { "streak": 3, "points": 250, "label": "BONUS DE RACHA" },
-          { "streak": 6, "points": 700, "label": "SUPER RACHA" }
+          {
+            "streak": 3,
+            "points": 250,
+            "label": "BONUS DE RACHA"
+          },
+          {
+            "streak": 6,
+            "points": 700,
+            "label": "SUPER RACHA"
+          }
         ]
       },
       "jackpotScale": 0.2,
       "modifiers": [
-        { "id": "mult_x2",   "fromMinute": 0,  "toMinute": 10, "type": "points",   "value": 2,   "title": "MULTIPLICADORES x2", "message": "Todos los puntos valen el doble", "color": "#F5C451", "sound": "slot.win_big",  "fx": "rays" },
-        { "id": "streak_x2", "fromMinute": 10, "toMinute": 20, "type": "streak",   "value": 2,   "title": "RACHAS x2",          "message": "Los bonus de racha valen el doble", "color": "#FF7A45", "sound": "slot.win_big",  "fx": "pulse" },
-        { "id": "jack_x3",   "fromMinute": 20, "toMinute": 30, "type": "jackpot",  "value": 3,   "title": "JACKPOTS x3",        "message": "Tres veces más jackpots", "color": "#B57CFF", "sound": "slot.jackpot",  "fx": "rays" },
-        { "id": "bonus_win", "fromMinute": 30, "toMinute": 40, "type": "flat",     "value": 150, "title": "BONUS DE PUNTOS",    "message": "+150 puntos extra por victoria", "color": "#35D295", "sound": "reward.claim",  "fx": "pulse" },
-        { "id": "rewards_x2","fromMinute": 40, "toMinute": 50, "type": "coins",    "value": 2,   "title": "RECOMPENSAS x2",     "message": "Los jackpots pagan el doble de fichas", "color": "#FFD34D", "sound": "coins.add", "fx": "coins" },
-        { "id": "mad_table", "fromMinute": 50, "toMinute": 60, "type": "table",    "value": 3,   "title": "MESAS LOCAS",        "message": "Las mesas marcadas dan x3 puntos", "color": "#5CA4FF", "sound": "slot.win_big",  "fx": "shake" }
+        {
+          "id": "mult_x2",
+          "fromMinute": 0,
+          "toMinute": 10,
+          "type": "points",
+          "value": 2,
+          "title": "MULTIPLICADORES x2",
+          "message": "Todos los puntos valen el doble",
+          "color": "#F5C451",
+          "sound": "slot.win_big",
+          "fx": "rays"
+        },
+        {
+          "id": "streak_x2",
+          "fromMinute": 10,
+          "toMinute": 20,
+          "type": "streak",
+          "value": 2,
+          "title": "RACHAS x2",
+          "message": "Los bonus de racha valen el doble",
+          "color": "#FF7A45",
+          "sound": "slot.win_big",
+          "fx": "pulse"
+        },
+        {
+          "id": "jack_x3",
+          "fromMinute": 20,
+          "toMinute": 30,
+          "type": "jackpot",
+          "value": 3,
+          "title": "JACKPOTS x3",
+          "message": "Tres veces más jackpots",
+          "color": "#B57CFF",
+          "sound": "slot.jackpot",
+          "fx": "rays"
+        },
+        {
+          "id": "bonus_win",
+          "fromMinute": 30,
+          "toMinute": 40,
+          "type": "flat",
+          "value": 150,
+          "title": "BONUS DE PUNTOS",
+          "message": "+150 puntos extra por victoria",
+          "color": "#35D295",
+          "sound": "reward.claim",
+          "fx": "pulse"
+        },
+        {
+          "id": "rewards_x2",
+          "fromMinute": 40,
+          "toMinute": 50,
+          "type": "coins",
+          "value": 2,
+          "title": "RECOMPENSAS x2",
+          "message": "Los jackpots pagan el doble de fichas",
+          "color": "#FFD34D",
+          "sound": "coins.add",
+          "fx": "coins"
+        },
+        {
+          "id": "mad_table",
+          "fromMinute": 50,
+          "toMinute": 60,
+          "type": "table",
+          "value": 3,
+          "title": "MESAS LOCAS",
+          "message": "Las mesas marcadas dan x3 puntos",
+          "color": "#5CA4FF",
+          "sound": "slot.win_big",
+          "fx": "shake"
+        }
       ],
-      "featured": { "everyMinutes": 10, "count": 2, "pointsMultiplier": 3, "onlyWithModifier": "mad_table" },
+      "featured": {
+        "everyMinutes": 10,
+        "count": 2,
+        "pointsMultiplier": 3,
+        "onlyWithModifier": "mad_table"
+      },
       "surprise": {
-        "count": 2, "durationSeconds": 120, "earliestMinute": 6, "latestMinute": 52,
-        "pointsMultiplier": 5, "jackpotScale": 3, "title": "¡CAOS TOTAL!",
-        "message": "2 minutos de locura: puntos x5 y jackpots x3", "color": "#FF3B5C", "sound": "slot.jackpot", "fx": "shake"
+        "count": 2,
+        "durationSeconds": 120,
+        "earliestMinute": 6,
+        "latestMinute": 52,
+        "pointsMultiplier": 5,
+        "jackpotScale": 3,
+        "title": "¡CAOS TOTAL!",
+        "message": "2 minutos de locura: puntos x5 y jackpots x3",
+        "color": "#FF3B5C",
+        "sound": "slot.jackpot",
+        "fx": "shake"
       },
       "rewards": [
-        { "id": "top1",  "fromRank": 1,  "toRank": 1,  "label": "TOP 1",  "coinsCents": 150000, "cosmetics": ["title_caos"] },
-        { "id": "top10", "fromRank": 2,  "toRank": 10, "label": "TOP 10", "coinsCents": 50000,  "cosmetics": [] },
-        { "id": "top50", "fromRank": 11, "toRank": 50, "label": "TOP 50", "coinsCents": 15000,  "cosmetics": [] },
-        { "id": "part",  "participation": true, "minRounds": 10, "label": "PARTICIPACIÓN", "coinsCents": 2500, "cosmetics": [] }
+        {
+          "id": "top1",
+          "fromRank": 1,
+          "toRank": 1,
+          "label": "TOP 1",
+          "coinsCents": 150000,
+          "cosmetics": [
+            "title_caos"
+          ]
+        },
+        {
+          "id": "top10",
+          "fromRank": 2,
+          "toRank": 10,
+          "label": "TOP 10",
+          "coinsCents": 50000,
+          "cosmetics": []
+        },
+        {
+          "id": "top50",
+          "fromRank": 11,
+          "toRank": 50,
+          "label": "TOP 50",
+          "coinsCents": 15000,
+          "cosmetics": []
+        },
+        {
+          "id": "part",
+          "participation": true,
+          "minRounds": 10,
+          "label": "PARTICIPACIÓN",
+          "coinsCents": 2500,
+          "cosmetics": []
+        }
       ]
     },
-
     "todo_o_nada": {
       "name": "Todo o Nada",
       "kind": "risk",
@@ -164,10 +399,22 @@
       "jackpotScale": 0,
       "risk": {
         "steps": [
-          { "multiplier": 2,  "chance": 0.55 },
-          { "multiplier": 3,  "chance": 0.6 },
-          { "multiplier": 5,  "chance": 0.5 },
-          { "multiplier": 10, "chance": 0.4 }
+          {
+            "multiplier": 2,
+            "chance": 0.55
+          },
+          {
+            "multiplier": 3,
+            "chance": 0.6
+          },
+          {
+            "multiplier": 5,
+            "chance": 0.5
+          },
+          {
+            "multiplier": 10,
+            "chance": 0.4
+          }
         ],
         "shieldEveryStreak": 5,
         "maxShields": 2,
@@ -175,13 +422,42 @@
         "autoCashAtEnd": true
       },
       "rewards": [
-        { "id": "top1",  "fromRank": 1,  "toRank": 1,  "label": "TOP 1",  "coinsCents": 150000, "cosmetics": ["title_todo_nada"] },
-        { "id": "top10", "fromRank": 2,  "toRank": 10, "label": "TOP 10", "coinsCents": 50000,  "cosmetics": [] },
-        { "id": "top50", "fromRank": 11, "toRank": 50, "label": "TOP 50", "coinsCents": 15000,  "cosmetics": [] },
-        { "id": "part",  "participation": true, "minRounds": 10, "label": "PARTICIPACIÓN", "coinsCents": 2500, "cosmetics": [] }
+        {
+          "id": "top1",
+          "fromRank": 1,
+          "toRank": 1,
+          "label": "TOP 1",
+          "coinsCents": 150000,
+          "cosmetics": [
+            "title_todo_nada"
+          ]
+        },
+        {
+          "id": "top10",
+          "fromRank": 2,
+          "toRank": 10,
+          "label": "TOP 10",
+          "coinsCents": 50000,
+          "cosmetics": []
+        },
+        {
+          "id": "top50",
+          "fromRank": 11,
+          "toRank": 50,
+          "label": "TOP 50",
+          "coinsCents": 15000,
+          "cosmetics": []
+        },
+        {
+          "id": "part",
+          "participation": true,
+          "minRounds": 10,
+          "label": "PARTICIPACIÓN",
+          "coinsCents": 2500,
+          "cosmetics": []
+        }
       ]
     },
-
     "high_roller": {
       "name": "High Roller",
       "kind": "highroller",
@@ -201,26 +477,113 @@
         "milestones": []
       },
       "jackpotScale": 0.25,
-      "featured": { "everyMinutes": 15, "count": 2, "pointsMultiplier": 2 },
+      "featured": {
+        "everyMinutes": 15,
+        "count": 2,
+        "pointsMultiplier": 2
+      },
       "objectives": [
-        { "id": "hr_wins",   "type": "wins",       "target": 25, "points": 1000, "label": "Gana 25 rondas" },
-        { "id": "hr_streak", "type": "streak",     "target": 6,  "points": 1000, "label": "Racha de 6 victorias" },
-        { "id": "hr_mult",   "type": "multiplier", "target": 20, "points": 1000, "label": "Gana una ronda con x20 o más" },
-        { "id": "hr_games",  "type": "games",      "target": 4,  "points": 1000, "label": "Juega en 4 juegos distintos" },
-        { "id": "hr_vip",    "type": "featuredWins","target": 5, "points": 1000, "label": "Gana 5 veces en mesas VIP" }
+        {
+          "id": "hr_wins",
+          "type": "wins",
+          "target": 25,
+          "points": 1000,
+          "label": "Gana 25 rondas"
+        },
+        {
+          "id": "hr_streak",
+          "type": "streak",
+          "target": 6,
+          "points": 1000,
+          "label": "Racha de 6 victorias"
+        },
+        {
+          "id": "hr_mult",
+          "type": "multiplier",
+          "target": 20,
+          "points": 1000,
+          "label": "Gana una ronda con x20 o más"
+        },
+        {
+          "id": "hr_games",
+          "type": "games",
+          "target": 4,
+          "points": 1000,
+          "label": "Juega en 4 juegos distintos"
+        },
+        {
+          "id": "hr_vip",
+          "type": "featuredWins",
+          "target": 5,
+          "points": 1000,
+          "label": "Gana 5 veces en mesas VIP"
+        }
       ],
       "unlocks": [
-        { "id": "vip_pass", "minPoints": 3000, "label": "Pase VIP del sábado", "detail": "Título y marco VIP + 1 comodín de racha en el Casino Royale", "cosmetics": ["title_highroller_vip", "frame_vip"], "perk": { "streakShields": 1, "vip": true } },
-        { "id": "vip_top",  "maxRank": 10,     "label": "Top 10 High Roller", "detail": "1 comodín de racha extra en el Casino Royale", "cosmetics": [], "perk": { "streakShields": 1, "vip": true } }
+        {
+          "id": "vip_pass",
+          "minPoints": 3000,
+          "label": "Pase VIP del sábado",
+          "detail": "Título y marco VIP + 1 comodín de racha en el Casino Royale",
+          "cosmetics": [
+            "title_highroller_vip",
+            "frame_vip"
+          ],
+          "perk": {
+            "streakShields": 1,
+            "vip": true
+          }
+        },
+        {
+          "id": "vip_top",
+          "maxRank": 10,
+          "label": "Top 10 High Roller",
+          "detail": "1 comodín de racha extra en el Casino Royale",
+          "cosmetics": [],
+          "perk": {
+            "streakShields": 1,
+            "vip": true
+          }
+        }
       ],
       "rewards": [
-        { "id": "top1",  "fromRank": 1,  "toRank": 1,  "label": "TOP 1",  "coinsCents": 300000, "cosmetics": ["title_highroller_vip", "frame_vip"] },
-        { "id": "top10", "fromRank": 2,  "toRank": 10, "label": "TOP 10", "coinsCents": 100000, "cosmetics": [] },
-        { "id": "top50", "fromRank": 11, "toRank": 50, "label": "TOP 50", "coinsCents": 30000,  "cosmetics": [] },
-        { "id": "part",  "participation": true, "minRounds": 10, "label": "PARTICIPACIÓN", "coinsCents": 5000, "cosmetics": [] }
+        {
+          "id": "top1",
+          "fromRank": 1,
+          "toRank": 1,
+          "label": "TOP 1",
+          "coinsCents": 300000,
+          "cosmetics": [
+            "title_highroller_vip",
+            "frame_vip"
+          ]
+        },
+        {
+          "id": "top10",
+          "fromRank": 2,
+          "toRank": 10,
+          "label": "TOP 10",
+          "coinsCents": 100000,
+          "cosmetics": []
+        },
+        {
+          "id": "top50",
+          "fromRank": 11,
+          "toRank": 50,
+          "label": "TOP 50",
+          "coinsCents": 30000,
+          "cosmetics": []
+        },
+        {
+          "id": "part",
+          "participation": true,
+          "minRounds": 10,
+          "label": "PARTICIPACIÓN",
+          "coinsCents": 5000,
+          "cosmetics": []
+        }
       ]
     },
-
     "casino_royale": {
       "name": "Casino Royale",
       "kind": "royale",
@@ -236,41 +599,194 @@
         "streakStepPoints": 40,
         "breakOnLoss": true,
         "milestones": [
-          { "streak": 3,  "points": 300,  "label": "BONUS DE RACHA" },
-          { "streak": 5,  "points": 800,  "label": "SUPER RACHA" },
-          { "streak": 10, "points": 2500, "label": "RACHA REAL" }
+          {
+            "streak": 3,
+            "points": 300,
+            "label": "BONUS DE RACHA"
+          },
+          {
+            "streak": 5,
+            "points": 800,
+            "label": "SUPER RACHA"
+          },
+          {
+            "streak": 10,
+            "points": 2500,
+            "label": "RACHA REAL"
+          }
         ]
       },
       "jackpotScale": 0.5,
       "phases": [
-        { "id": "clasificacion", "name": "FASE 1 · CLASIFICACIÓN", "banner": "¡EMPIEZA EL CASINO ROYALE!", "fromMinute": 0,   "toMinute": 60,  "pointsMultiplier": 1,   "jackpotScale": 1, "featured": false, "surprise": false, "color": "#5CA4FF" },
-        { "id": "high_stakes",   "name": "FASE 2 · HIGH STAKES",   "banner": "¡HIGH STAKES!",               "fromMinute": 60,  "toMinute": 120, "pointsMultiplier": 1.5, "jackpotScale": 2, "featured": true,  "surprise": false, "color": "#B57CFF" },
-        { "id": "final",         "name": "FASE 3 · FINAL",         "banner": "¡FASE FINAL!",                "fromMinute": 120, "toMinute": 180, "pointsMultiplier": 2,   "jackpotScale": 3, "featured": true,  "surprise": true,  "color": "#F5C451" }
+        {
+          "id": "clasificacion",
+          "name": "FASE 1 · CLASIFICACIÓN",
+          "banner": "¡EMPIEZA EL CASINO ROYALE!",
+          "fromMinute": 0,
+          "toMinute": 60,
+          "pointsMultiplier": 1,
+          "jackpotScale": 1,
+          "featured": false,
+          "surprise": false,
+          "color": "#5CA4FF"
+        },
+        {
+          "id": "high_stakes",
+          "name": "FASE 2 · HIGH STAKES",
+          "banner": "¡HIGH STAKES!",
+          "fromMinute": 60,
+          "toMinute": 120,
+          "pointsMultiplier": 1.5,
+          "jackpotScale": 2,
+          "featured": true,
+          "surprise": false,
+          "color": "#B57CFF"
+        },
+        {
+          "id": "final",
+          "name": "FASE 3 · FINAL",
+          "banner": "¡FASE FINAL!",
+          "fromMinute": 120,
+          "toMinute": 180,
+          "pointsMultiplier": 2,
+          "jackpotScale": 3,
+          "featured": true,
+          "surprise": true,
+          "color": "#F5C451"
+        }
       ],
-      "featured": { "everyMinutes": 15, "count": 2, "pointsMultiplier": 2 },
+      "featured": {
+        "everyMinutes": 15,
+        "count": 2,
+        "pointsMultiplier": 2
+      },
       "surprise": {
-        "count": 2, "durationSeconds": 120, "earliestMinute": 125, "latestMinute": 172,
-        "pointsMultiplier": 3, "jackpotScale": 3, "title": "¡CAOS TOTAL!",
-        "message": "2 minutos: puntos x3 y jackpots x3", "color": "#FF3B5C", "sound": "slot.jackpot", "fx": "shake"
+        "count": 2,
+        "durationSeconds": 120,
+        "earliestMinute": 125,
+        "latestMinute": 172,
+        "pointsMultiplier": 3,
+        "jackpotScale": 3,
+        "title": "¡CAOS TOTAL!",
+        "message": "2 minutos: puntos x3 y jackpots x3",
+        "color": "#FF3B5C",
+        "sound": "slot.jackpot",
+        "fx": "shake"
       },
       "objectives": [
-        { "id": "r1_wins",   "type": "wins",        "target": 10, "points": 1000, "label": "Gana 10 rondas",                 "phase": "clasificacion" },
-        { "id": "r1_streak", "type": "streak",      "target": 4,  "points": 1000, "label": "Racha de 4",                     "phase": "clasificacion" },
-        { "id": "r2_jack",   "type": "jackpot",     "target": 1,  "points": 1000, "label": "Consigue un jackpot",            "phase": "high_stakes" },
-        { "id": "r2_mult",   "type": "multiplier",  "target": 10, "points": 1000, "label": "Gana con x10 o más",             "phase": "high_stakes" },
-        { "id": "r3_wins",   "type": "wins",        "target": 15, "points": 2000, "label": "FINAL: gana 15 rondas",          "phase": "final" },
-        { "id": "r3_streak", "type": "streak",      "target": 5,  "points": 2000, "label": "FINAL: racha de 5",              "phase": "final" },
-        { "id": "r3_feat",   "type": "featuredWins","target": 3,  "points": 2000, "label": "FINAL: gana 3 en mesas especiales","phase": "final" }
+        {
+          "id": "r1_wins",
+          "type": "wins",
+          "target": 10,
+          "points": 1000,
+          "label": "Gana 10 rondas",
+          "phase": "clasificacion"
+        },
+        {
+          "id": "r1_streak",
+          "type": "streak",
+          "target": 4,
+          "points": 1000,
+          "label": "Racha de 4",
+          "phase": "clasificacion"
+        },
+        {
+          "id": "r2_jack",
+          "type": "jackpot",
+          "target": 1,
+          "points": 1000,
+          "label": "Consigue un jackpot",
+          "phase": "high_stakes"
+        },
+        {
+          "id": "r2_mult",
+          "type": "multiplier",
+          "target": 10,
+          "points": 1000,
+          "label": "Gana con x10 o más",
+          "phase": "high_stakes"
+        },
+        {
+          "id": "r3_wins",
+          "type": "wins",
+          "target": 15,
+          "points": 2000,
+          "label": "FINAL: gana 15 rondas",
+          "phase": "final"
+        },
+        {
+          "id": "r3_streak",
+          "type": "streak",
+          "target": 5,
+          "points": 2000,
+          "label": "FINAL: racha de 5",
+          "phase": "final"
+        },
+        {
+          "id": "r3_feat",
+          "type": "featuredWins",
+          "target": 3,
+          "points": 2000,
+          "label": "FINAL: gana 3 en mesas especiales",
+          "phase": "final"
+        }
       ],
       "rewards": [
-        { "id": "top1",  "fromRank": 1,  "toRank": 1,   "label": "TOP 1",  "coinsCents": 2500000, "cosmetics": ["trophy_royale", "title_royale_champion", "frame_royale"] },
-        { "id": "top10", "fromRank": 2,  "toRank": 10,  "label": "TOP 10", "coinsCents": 500000,  "cosmetics": ["title_royale_elite", "frame_royale_elite"] },
-        { "id": "top50", "fromRank": 11, "toRank": 50,  "label": "TOP 50", "coinsCents": 150000,  "cosmetics": ["title_royale_finalist"] },
-        { "id": "top100","fromRank": 51, "toRank": 100, "label": "TOP 100","coinsCents": 50000,   "cosmetics": ["emote_royale"] },
-        { "id": "part",  "participation": true, "minRounds": 10, "label": "PARTICIPACIÓN", "coinsCents": 10000, "cosmetics": ["title_royale_guest"] }
+        {
+          "id": "top1",
+          "fromRank": 1,
+          "toRank": 1,
+          "label": "TOP 1",
+          "coinsCents": 2500000,
+          "cosmetics": [
+            "trophy_royale",
+            "title_royale_champion",
+            "frame_royale"
+          ]
+        },
+        {
+          "id": "top10",
+          "fromRank": 2,
+          "toRank": 10,
+          "label": "TOP 10",
+          "coinsCents": 500000,
+          "cosmetics": [
+            "title_royale_elite",
+            "frame_royale_elite"
+          ]
+        },
+        {
+          "id": "top50",
+          "fromRank": 11,
+          "toRank": 50,
+          "label": "TOP 50",
+          "coinsCents": 150000,
+          "cosmetics": [
+            "title_royale_finalist"
+          ]
+        },
+        {
+          "id": "top100",
+          "fromRank": 51,
+          "toRank": 100,
+          "label": "TOP 100",
+          "coinsCents": 50000,
+          "cosmetics": [
+            "emote_royale"
+          ]
+        },
+        {
+          "id": "part",
+          "participation": true,
+          "minRounds": 10,
+          "label": "PARTICIPACIÓN",
+          "coinsCents": 10000,
+          "cosmetics": [
+            "title_royale_guest"
+          ]
+        }
       ]
     },
-
     "caza_tesoro": {
       "name": "Caza del Tesoro",
       "kind": "treasure",
@@ -288,21 +804,98 @@
         "milestones": []
       },
       "jackpotScale": 0.5,
-      "featured": { "everyMinutes": 20, "count": 1, "pointsMultiplier": 2 },
+      "featured": {
+        "everyMinutes": 20,
+        "count": 1,
+        "pointsMultiplier": 2
+      },
       "objectives": [
-        { "id": "t_wins",    "type": "wins",        "target": 3, "points": 500, "label": "Gana 3 partidas" },
-        { "id": "t_streak",  "type": "streak",      "target": 3, "points": 500, "label": "Consigue una racha de 3" },
-        { "id": "t_jackpot", "type": "jackpot",     "target": 1, "points": 800, "label": "Consigue un jackpot" },
-        { "id": "t_rounds",  "type": "rounds",      "target": 5, "points": 300, "label": "Juega 5 partidas" },
-        { "id": "t_games",   "type": "games",       "target": 3, "points": 500, "label": "Juega en 3 mesas distintas" },
-        { "id": "t_mult",    "type": "multiplier",  "target": 5, "points": 600, "label": "Gana con un multiplicador x5" },
-        { "id": "t_special", "type": "featuredWins","target": 2, "points": 800, "label": "Desafío: gana 2 veces en la mesa del tesoro" }
+        {
+          "id": "t_wins",
+          "type": "wins",
+          "target": 3,
+          "points": 500,
+          "label": "Gana 3 partidas"
+        },
+        {
+          "id": "t_streak",
+          "type": "streak",
+          "target": 3,
+          "points": 500,
+          "label": "Consigue una racha de 3"
+        },
+        {
+          "id": "t_jackpot",
+          "type": "jackpot",
+          "target": 1,
+          "points": 800,
+          "label": "Consigue un jackpot"
+        },
+        {
+          "id": "t_rounds",
+          "type": "rounds",
+          "target": 5,
+          "points": 300,
+          "label": "Juega 5 partidas"
+        },
+        {
+          "id": "t_games",
+          "type": "games",
+          "target": 3,
+          "points": 500,
+          "label": "Juega en 3 mesas distintas"
+        },
+        {
+          "id": "t_mult",
+          "type": "multiplier",
+          "target": 5,
+          "points": 600,
+          "label": "Gana con un multiplicador x5"
+        },
+        {
+          "id": "t_special",
+          "type": "featuredWins",
+          "target": 2,
+          "points": 800,
+          "label": "Desafío: gana 2 veces en la mesa del tesoro"
+        }
       ],
-      "chest": { "coinsCents": 30000, "cosmeticsPool": ["title_tesoro", "fx_tesoro", "fx_fireworks"], "duplicateCoinsCents": 10000 },
+      "chest": {
+        "coinsCents": 30000,
+        "cosmeticsPool": [
+          "title_tesoro",
+          "fx_tesoro",
+          "fx_fireworks"
+        ],
+        "duplicateCoinsCents": 10000
+      },
       "rewards": [
-        { "id": "top1",  "fromRank": 1,  "toRank": 1,  "label": "TOP 1",  "coinsCents": 100000, "cosmetics": ["title_tesoro"] },
-        { "id": "top10", "fromRank": 2,  "toRank": 10, "label": "TOP 10", "coinsCents": 30000,  "cosmetics": [] },
-        { "id": "part",  "participation": true, "minRounds": 5, "label": "PARTICIPACIÓN", "coinsCents": 2500, "cosmetics": [] }
+        {
+          "id": "top1",
+          "fromRank": 1,
+          "toRank": 1,
+          "label": "TOP 1",
+          "coinsCents": 100000,
+          "cosmetics": [
+            "title_tesoro"
+          ]
+        },
+        {
+          "id": "top10",
+          "fromRank": 2,
+          "toRank": 10,
+          "label": "TOP 10",
+          "coinsCents": 30000,
+          "cosmetics": []
+        },
+        {
+          "id": "part",
+          "participation": true,
+          "minRounds": 5,
+          "label": "PARTICIPACIÓN",
+          "coinsCents": 2500,
+          "cosmetics": []
+        }
       ]
     }
   }

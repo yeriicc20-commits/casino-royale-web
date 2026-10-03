@@ -14,6 +14,7 @@
  */
 import { handValue } from '@/lib/duel';
 import { moduleFor, type Rng } from './games';
+import { bestHand } from './poker';
 import type { Bet, CompetitiveConfig, GameDef, MatchState, Mode, Side } from './types';
 
 export const other = (s: Side): Side => (s === 'a' ? 'b' : 'a');
@@ -34,6 +35,7 @@ export function newMatch(cfg: CompetitiveConfig, def: GameDef, mode: Mode, nowMs
     misses: { a: 0, b: 0 },
     seen: { a: nowMs, b: nowMs },
     bj: null,
+    pk: null,
     history: [],
     startedAt: nowMs,
     endedAt: 0,
@@ -77,7 +79,8 @@ function resolveRound(cfg: CompetitiveConfig, def: GameDef, st: MatchState, rng:
     outcome: r.outcome,
     a: { bet: st.bets.a?.amount ?? 0, delta: r.a.delta, detail: r.a.detail },
     b: { bet: st.bets.b?.amount ?? 0, delta: r.b.delta, detail: r.b.detail },
-    cards: st.bj ? { dealer: [...st.bj.dealer], a: [...st.bj.hands.a.cards], b: [...st.bj.hands.b.cards] } : undefined,
+    cards: st.bj ? { dealer: [...st.bj.dealer], a: [...st.bj.hands.a.cards], b: [...st.bj.hands.b.cards] }
+      : st.pk ? { dealer: [...st.pk.board], board: [...st.pk.board], a: [...st.pk.hole.a], b: [...st.pk.hole.b] } : undefined,
     bets: { a: st.bets.a ? { ...st.bets.a } : null, b: st.bets.b ? { ...st.bets.b } : null },
   } as MatchState['history'][number]);
 
@@ -88,6 +91,7 @@ function resolveRound(cfg: CompetitiveConfig, def: GameDef, st: MatchState, rng:
     return;
   }
   st.bj = null;
+  st.pk = null;
   openBetting(def, st, nowMs, true);
 }
 
@@ -199,8 +203,17 @@ export function viewFor(def: GameDef, st: MatchState, side: Side, nowMs: number)
   const o = other(side);
   const last = st.history.length ? st.history[st.history.length - 1] : null;
   const bj = st.bj;
+  const pk = st.pk ?? null;
   const myHand = bj ? bj.hands[side] : null;
   const myBet = st.bets[side];
+  const playing = st.phase === 'play';
+  // Cara a cara: arriba se ven las cartas del RIVAL (blackjack, la primera boca
+  // arriba y el resto tapadas) o la MESA (póker: el flop mientras se decide).
+  const top: string[] = def.kind === 'poker'
+    ? (pk ? (playing ? [...pk.board.slice(0, 3), 'back', 'back'] : pk.board) : [])
+    : bj ? (playing ? bj.hands[o].cards.map((c, i) => (i === 0 ? c : 'back')) : bj.hands[o].cards) : [];
+  const mine: string[] = def.kind === 'poker' ? (pk ? pk.hole[side] : []) : myHand ? myHand.cards : [];
+  const lastTop = last?.cards ? (def.kind === 'poker' ? (last.cards.board ?? []) : last.cards[o]) : [];
   return {
     game: st.game,
     mode: st.mode,
@@ -222,14 +235,16 @@ export function viewFor(def: GameDef, st: MatchState, side: Side, nowMs: number)
     myBetChance: myBet?.chance ?? 0,
     // La apuesta del otro es secreta hasta que se resuelve la ronda.
     theirBetPlaced: st.bets[o] !== null,
-    hasHand: !!(bj && myHand && myHand.cards.length),
-    dealerCards: bj ? (st.phase === 'play' ? [bj.dealer[0], 'back'] : bj.dealer) : [],
-    myCards: myHand ? myHand.cards : [],
+    kind: def.kind,
+    hasHand: mine.length > 0,
+    dealerCards: top,
+    myCards: mine,
     myTotal: myHand ? handValue(myHand.cards) : 0,
-    myDone: myHand ? myHand.done : true,
-    canDouble: !!(bj && myHand && !myHand.done && myHand.cards.length === 2 && myBet && myBet.amount * 2 <= st.stacks[side]),
-    theirCardCount: bj ? bj.hands[o].cards.length : 0,
-    theirDone: bj ? bj.hands[o].done : true,
+    myHandName: pk ? bestHand([...pk.hole[side], ...pk.board.slice(0, 3)]).name : '',
+    myDone: pk ? !!pk.choice[side] : myHand ? myHand.done : true,
+    canDouble: false,
+    theirCardCount: pk ? 2 : bj ? bj.hands[o].cards.length : 0,
+    theirDone: pk ? !!pk.choice[o] : bj ? bj.hands[o].done : true,
     hasLast: !!last,
     lastRound: last?.round ?? 0,
     lastOutcome: last?.outcome ?? '',
@@ -239,7 +254,7 @@ export function viewFor(def: GameDef, st: MatchState, side: Side, nowMs: number)
     lastTheirBet: last ? last[o].bet : 0,
     lastTheirDelta: last ? last[o].delta : 0,
     lastTheirDetail: last ? last[o].detail : '',
-    lastDealer: last?.cards?.dealer ?? [],
+    lastDealer: lastTop,
     lastMyCards: last?.cards ? last.cards[side] : [],
     lastTheirCards: last?.cards ? last.cards[o] : [],
     history: st.history.map((h) => ({ round: h.round, outcome: h.outcome, myDelta: h[side].delta, theirDelta: h[o].delta })),

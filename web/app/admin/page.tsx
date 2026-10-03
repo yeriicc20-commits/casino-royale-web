@@ -77,6 +77,9 @@ export default async function AdminPage() {
         <div className="flex items-center gap-3">
           {production?.maintenance_mode && <Badge tone="red">Mantenimiento activo</Badge>}
 
+          <Link href="/admin/en-vivo" className="btn-gold">
+            En vivo
+          </Link>
           <Link href="/admin/jugadores" className="btn-ghost">
             Jugadores
           </Link>
