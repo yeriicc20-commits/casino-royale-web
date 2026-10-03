@@ -1,6 +1,7 @@
 import { body, corsPreflight, currentUser, db, fail, json, needsAccount, text }
   from '@/lib/online';
 import { guardOnlineAccess } from '@/lib/versions';
+import { playerIdOf } from '@/lib/ranking';
 
 /**
  * POST /api/social/friends/add   { playerId, code }
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
 
   const input = await body<{ code?: string }>(request);
 
-  const playerId = user.id;
+  const playerId = await playerIdOf(user.id);
   const code = text(input.code, 16).toUpperCase().replace(/-/g, '');
 
   if (!code) return fail('Faltan datos.');

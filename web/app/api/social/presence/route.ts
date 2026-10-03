@@ -81,6 +81,10 @@ export async function POST(request: Request) {
   // columna (15_panel_vivo.sql sin ejecutar), el reintento de abajo la quite.
   const game = text(input.game, 24).toLowerCase();
   if (/^[a-z0-9_]+$/.test(game)) looks.playing = game;
+  // Desde qué dispositivo juega (panel en vivo). El juego lo manda en la
+  // cabecera X-Game-Platform; si no viene, se deduce del navegador.
+  const platform = platformOf(request);
+  if (platform) looks.platform = platform;
 
   // Saldo imposible para el podio (juego modificado): se queda el de antes.
   const { data: before } = await client
@@ -113,7 +117,7 @@ export async function POST(request: Request) {
 
   // Sin las columnas del pase (falta ejecutar 14_pase_temporada.sql): se publica
   // igual, sin título ni marco. El ranking no puede dejar de funcionar por esto.
-  if (error && /title_id|frame_id|playing|column/i.test(String(error.message || ''))) {
+  if (error && /title_id|frame_id|playing|platform|column/i.test(String(error.message || ''))) {
     ({ error } = await client.from('online_players').upsert(row, { onConflict: 'player_id' }));
   }
 
@@ -202,4 +206,16 @@ async function claimGrants(client: ReturnType<typeof db>, playerId: string) {
 
 export async function OPTIONS() {
   return corsPreflight();
+}
+
+/** android, ios, windows, mac, linux, web o editor. Vacío si no se sabe. */
+function platformOf(request: Request): string {
+  const sent = String(request.headers.get('X-Game-Platform') ?? '').trim().toLowerCase();
+  if (/^[a-z]{2,12}$/.test(sent)) return sent;
+  const ua = String(request.headers.get('User-Agent') ?? '').toLowerCase();
+  if (/iphone|ipad|ios/.test(ua)) return 'ios';
+  if (/android/.test(ua)) return 'android';
+  if (/windows/.test(ua)) return 'windows';
+  if (/mac os|macintosh/.test(ua)) return 'mac';
+  return '';
 }

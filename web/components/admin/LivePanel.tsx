@@ -13,6 +13,7 @@ interface LivePlayer {
   rounds: number;
   last_seen: string;
   playing?: string | null;
+  platform?: string | null;
   user_id?: string | null;
   pending_grants: number;
   pending_cents: number;
@@ -37,6 +38,21 @@ const GAME_NAMES: Record<string, string> = {
   dice: 'Dados', baccarat: 'Bacarrá', hilo: 'Mayor o menor', scratch: 'Rasca', videopoker: 'Video póker',
 };
 const gameName = (g?: string | null) => (g ? GAME_NAMES[g] ?? g : '—');
+
+const PLATFORMS: Record<string, { icon: string; label: string }> = {
+  android: { icon: '🤖', label: 'Android' },
+  ios: { icon: '', label: 'iPhone' },
+  windows: { icon: '🖥️', label: 'PC' },
+  mac: { icon: '💻', label: 'Mac' },
+  linux: { icon: '🐧', label: 'Linux' },
+  web: { icon: '🌐', label: 'Navegador' },
+  editor: { icon: '🛠️', label: 'Unity (pruebas)' },
+};
+function PlatformBadge({ platform }: { platform?: string | null }) {
+  const p = platform ? PLATFORMS[platform] ?? { icon: '📱', label: platform } : null;
+  if (!p) return <span className="rounded-md border border-white/10 px-2 py-0.5 text-xs text-slate-500">Dispositivo ?</span>;
+  return <span title={'Juega desde ' + p.label} className="rounded-md border border-white/15 bg-white/5 px-2 py-0.5 text-xs text-slate-200">{p.icon} {p.label}</span>;
+}
 
 export function LivePanel() {
   const [players, setPlayers] = useState<LivePlayer[]>([]);
@@ -154,6 +170,7 @@ function Row({ player, delta, open, detail, onToggle, onDone }: {
       <button type="button" onClick={onToggle} className="flex w-full flex-wrap items-center gap-x-5 gap-y-1 px-4 py-3 text-left">
         <span className={`h-2.5 w-2.5 rounded-full ${player.online ? 'bg-emerald-400' : 'bg-slate-600'}`} />
         <span className="min-w-[8rem] font-semibold text-slate-100">{player.name}</span>
+        <PlatformBadge platform={player.platform} />
         <span className="min-w-[9rem] font-display text-lg font-bold text-gold-400">
           {formatCents(player.balance_cents)}
           {delta !== undefined && (
