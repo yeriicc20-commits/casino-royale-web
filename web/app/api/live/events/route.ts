@@ -7,14 +7,15 @@ import {
   activeInstance, acceptsReports, nextInstance, rewardsReady, type Instance,
 } from '@/lib/events/schedule';
 import {
-  applyRounds, cash, contextAt, finalScore, fmtEuros, liveScore, loadState, newState, risk, type ApplyResult,
+  contextAt, finalScore, fmtEuros, liveScore, loadState, newState,
 } from '@/lib/events/engine';
+import { claimReward, openChest, reportRounds, riskOrCash, tierFor } from '@/lib/events/actions';
 import { eventView, meView } from '@/lib/events/view';
 import {
-  claimGrants, config, cosmeticsOf, defOf, deliver, instanceOf, loadRow, mutate,
-  participants, perksFor, rankOf, rng, secret, type ProgressRow,
+  claimGrants, config, cosmeticsOf, defOf, instanceOf, loadRow,
+  participants, perksFor, rankOf, secret, type ProgressRow,
 } from '@/lib/events/store';
-import type { CoinAward, EventDef, Feedback, PlayerState, RoundIn } from '@/lib/events/types';
+import type { EventDef, Feedback, PlayerState, RoundIn } from '@/lib/events/types';
 
 /**
  * POST /api/live/events   { op, ... }
@@ -129,14 +130,6 @@ async function stateFor(playerId: string, def: EventDef, inst: Instance): Promis
   return { st, participating: false };
 }
 
-function tierFor(def: EventDef, rank: number, rounds: number, score: number) {
-  if (score > 0) {
-    const ranked = def.rewards.find((r) => !r.participation && r.fromRank != null && r.toRank != null && rank >= r.fromRank && rank <= r.toRank);
-    if (ranked) return ranked;
-  }
-  return def.rewards.find((r) => r.participation && rounds >= (r.minRounds ?? 1)) ?? null;
-}
-
 /** Eventos terminados con premio sin recoger (los sin premio se dan por cerrados). */
 async function unclaimedFor(playerId: string) {
   const since = new Date(Date.now() - config.schedule.claimWindowDays * 86400000).toISOString();
@@ -215,20 +208,8 @@ async function opReport(playerId: string, input: Input) {
 
   const reportId = text(input.reportId, 48);
   if (!reportId) return fail('Falta el identificador del lote.');
-  const rounds = Array.isArray(input.rounds) ? input.rounds.slice(0, config.limits.maxRoundsPerReport) : [];
-
-  let applied: ApplyResult = { feedback: [], awards: [], counted: 0, ignored: 0, lowStake: 0 };
-  const { state, row } = await mutate(playerId, inst, def, (st) => {
-    if (st.reports.includes(reportId)) {
-      applied = { feedback: [], awards: [], counted: 0, ignored: 0, lowStake: 0 };
-      return;
-    }
-    applied = applyRounds(config, def, inst, st, rounds, now, rng, secret(), reportId);
-    st.reports = [...st.reports, reportId].slice(-64);
-  });
-
-  if (applied.ignored > 0) console.warn('[events] rondas ignoradas', playerId, inst.id, applied.ignored);
-  await deliver(playerId, inst.id, applied.awards);
+  const rounds = Array.isArray(input.rounds) ? input.rounds : [];
+  const { state, row, applied } = await reportRounds(playerId, inst, def, reportId, rounds, now);
 
   const out = base();
   out.active = eventView(config, def, inst.eventId, inst, now, secret());
@@ -251,10 +232,7 @@ async function opRisk(playerId: string, input: Input, op: 'risk' | 'cash') {
   if (!inst || !def || def.kind !== 'risk') return fail('Este evento no tiene riesgo.');
   if (!(now >= inst.opensMs && now < inst.closesMs)) return fail('El evento no está abierto.');
 
-  let result = { ok: false, message: '', feedback: [] as Feedback[] };
-  const { state, row } = await mutate(playerId, inst, def, (st) => {
-    result = op === 'risk' ? risk(def, st, rng) : cash(def, st);
-  });
+  const { state, row, result } = await riskOrCash(playerId, inst, def, op);
   if (!result.ok) return fail(result.message);
 
   const out = base();
@@ -274,23 +252,10 @@ async function opChest(playerId: string, input: Input) {
   if (now > inst.closesMs + config.schedule.claimWindowDays * 86400000) return fail('Ese cofre ya caducó.');
 
   const owned = new Set(await cosmeticsOf(playerId));
-  const pool = def.chest.cosmeticsPool.filter((c) => !owned.has(c));
-  const pick = pool.length ? pool[Math.floor(rng() * pool.length)] : '';
-
-  let ready = false;
-  const { state, row } = await mutate(playerId, inst, def, (st) => {
-    ready = !st.chestClaimed && (def.objectives ?? []).every((o) => st.done.includes(o.id));
-    if (ready) st.chestClaimed = true;
-  });
-  if (!ready) return fail(state.chestClaimed ? 'Ya abriste este cofre.' : 'Te faltan objetivos por completar.');
-
-  const award: CoinAward = {
-    claimId: inst.id + ':chest',
-    cents: def.chest.coinsCents + (pick ? 0 : def.chest.duplicateCoinsCents),
-    reason: 'Cofre del tesoro',
-    cosmetics: pick ? [pick] : [],
-  };
-  await deliver(playerId, inst.id, [award]);
+  const opened = await openChest(playerId, inst, def, owned);
+  const { state, row } = opened;
+  if (!opened.ok) return fail(state.chestClaimed ? 'Ya abriste este cofre.' : 'Te faltan objetivos por completar.');
+  const award = opened.award;
 
   const out = base();
   out.active = eventView(config, def, inst.eventId, inst, now, secret());
@@ -321,27 +286,9 @@ async function opClaim(playerId: string, input: Input) {
   const inst = instanceOf(text(input.instanceId, 24));
   const def = inst ? defOf(inst.eventId) : null;
   if (!inst || !def) return fail('Ese evento no existe.');
-  if (!rewardsReady(config, inst, now)) return fail('Los premios se reparten en cuanto cierre el evento.');
-
-  const row = await loadRow(playerId, inst.id);
-  if (!row || row.rounds <= 0) return fail('No participaste en ese evento.');
-  if (row.claimed) return fail('Ya recogiste este premio.');
-
-  const score = Number(row.final_score);
-  const rank = score > 0 ? await rankOf(inst.id, score, 'final_score') : 0;
-  const tier = tierFor(def, rank, row.rounds, score);
-
-  // Primero se marca (solo si seguía sin marcar): dos toques a la vez no cobran dos veces.
-  const { data: marked } = await db().from('online_event_progress').update({ claimed: true })
-    .eq('player_id', playerId).eq('instance_id', inst.id).eq('claimed', false).select('player_id');
-  if (!marked || !marked.length) return fail('Ya recogiste este premio.');
-
-  const awards: CoinAward[] = [];
-  if (tier) awards.push({ claimId: inst.id + ':rank', cents: tier.coinsCents, reason: 'Evento ' + def.name + ' · ' + tier.label, cosmetics: tier.cosmetics });
-  for (const u of def.unlocks ?? []) {
-    if (u.maxRank && rank > 0 && rank <= u.maxRank) awards.push({ claimId: inst.id + ':unlock:' + u.id, cents: 0, reason: u.label, cosmetics: u.cosmetics, perk: u.perk });
-  }
-  await deliver(playerId, inst.id, awards);
+  const claimed = await claimReward(playerId, inst, def, now);
+  if (!claimed.ok) return fail(claimed.message);
+  const { rank, tier, awards } = claimed;
 
   const out = base();
   out.hasClaimResult = true;

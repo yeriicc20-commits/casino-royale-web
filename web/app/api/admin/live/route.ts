@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { botMetrics } from '@/lib/bots/metrics';
 
 /**
  * GET /api/admin/live             -> todos los jugadores (conectados primero)
@@ -40,7 +41,14 @@ export async function GET(request: Request) {
   const players: Record<string, unknown>[] = (rows ?? []).map((p: Record<string, unknown>) => ({
     ...p,
     online: now - new Date(String(p.last_seen)).getTime() <= ONLINE_WINDOW_SECONDS * 1000,
+    // Sin 17_bots.sql la columna no existe: todos son personas.
+    is_bot: p.is_bot === true,
   }));
+
+  // Personas y bots, siempre por separado: un bot nunca cuenta como persona.
+  const humans = players.filter((p) => !p.is_bot);
+  const people = { online: humans.filter((p) => p.online).length, total: humans.length };
+  const bots = await botMetrics().catch(() => null);
 
   let detail: Record<string, unknown> | null = null;
   if (playerId) {
@@ -86,5 +94,5 @@ export async function GET(request: Request) {
     };
   }
 
-  return NextResponse.json({ ok: true, at: new Date().toISOString(), players, detail });
+  return NextResponse.json({ ok: true, at: new Date().toISOString(), players, people, bots, detail });
 }

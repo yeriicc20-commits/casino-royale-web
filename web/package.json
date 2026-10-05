@@ -8,7 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "npx --yes tsx --conditions=react-server tests/bots.test.ts && npx --yes tsx tests/competitivo.test.ts && npx --yes tsx tests/eventos.test.ts",
+    "test:bots": "npx --yes tsx --conditions=react-server tests/bots.test.ts",
+    "bots:worker": "npx --yes tsx --conditions=react-server --env-file=.env.local scripts/bots-worker.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

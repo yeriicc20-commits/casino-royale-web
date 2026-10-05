@@ -44,11 +44,17 @@ export default async function PlayersPage() {
 
   const admin = createAdminClient();
 
-  const [players, grants, accounts] = await Promise.all([
+  const [everyone, grants, accounts] = await Promise.all([
     loadPlayers(),
     loadGrants(),
     loadAccounts(),
   ]);
+
+  // Los bots no son jugadores para las cuentas de esta página: van aparte (y
+  // con su detalle en /admin/en-vivo).
+  const isBot = (p: AdminPlayer) => (p as AdminPlayer & { is_bot?: boolean }).is_bot === true;
+  const players = everyone.filter((p) => !isBot(p));
+  const botCount = everyone.length - players.length;
 
   const online = players.filter(
     (p) => Date.now() - new Date(p.last_seen).getTime() <= ONLINE_WINDOW_SECONDS * 1000,
@@ -116,7 +122,7 @@ export default async function PlayersPage() {
         <h1 className="heading mt-2 text-3xl">Jugadores</h1>
         <p className="mt-1 text-sm text-slate-400">
           {players.length} en el online · {online} conectados ahora · {formatCents(total)} en
-          circulación
+          circulación{botCount > 0 ? ` · ${botCount} bots aparte` : ''}
         </p>
       </header>
 

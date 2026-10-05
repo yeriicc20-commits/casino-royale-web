@@ -1,4 +1,5 @@
 import { db, PlayerRow, toLeaderboardEntry } from '@/lib/online';
+import { readBotsConfig } from '@/lib/bots/config';
 
 /**
  * La clasificación global: TODAS las cuentas registradas, no solo las que ya
@@ -14,6 +15,7 @@ export const OPENING_BALANCE_CENTS = 1000 * 100;
 
 export interface RankRow extends PlayerRow {
   user_id: string | null;
+  is_bot?: boolean;
 }
 
 export async function globalRows(): Promise<RankRow[]> {
@@ -29,8 +31,16 @@ export async function globalRows(): Promise<RankRow[]> {
 
   const byUser = new Map<string, RankRow>();
   const byPlayer = new Map<string, RankRow>();
+  // Los bots salen como un jugador más (sin cuenta de la web), salvo que el
+  // sistema esté apagado o se haya pedido dejarlos fuera (BOTS_IN_LEADERBOARD).
+  const bots = readBotsConfig();
+  const showBots = bots.enabled && bots.inLeaderboard;
   for (const p of (players.data ?? []) as RankRow[]) {
     const row = { ...p, balance_cents: Number(p.balance_cents || 0) };
+    if (p.is_bot) {
+      if (showBots) byUser.set('bot:' + p.player_id, row);
+      continue;
+    }
     if (p.user_id) byUser.set(String(p.user_id), row);
     byPlayer.set(String(p.player_id), row);
   }

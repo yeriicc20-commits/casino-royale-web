@@ -18,6 +18,26 @@ interface LivePlayer {
   pending_grants: number;
   pending_cents: number;
   online: boolean;
+  is_bot?: boolean;
+}
+
+interface BotMetrics {
+  enabled: boolean;
+  installed: boolean;
+  total: number;
+  online: number;
+  offline: number;
+  playing: number;
+  idle: number;
+  inEvents: number;
+  lookingFor1v1: number;
+  in1v1: number;
+  actionsPerMinute: number;
+  target: number;
+  min: number;
+  max: number;
+  lastTickAt: string | null;
+  byState: Record<string, number>;
 }
 
 interface Activity { id: number; at: string; balance_cents: number; delta_cents: number; rounds: number; rounds_delta: number; game: string | null; flag: string | null }
@@ -58,6 +78,8 @@ export function LivePanel() {
   const [players, setPlayers] = useState<LivePlayer[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [onlyOnline, setOnlyOnline] = useState(true);
+  const [showBots, setShowBots] = useState(false);
+  const [bots, setBots] = useState<BotMetrics | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [detail, setDetail] = useState<Detail | null>(null);
   const [changed, setChanged] = useState<Record<string, number>>({});
@@ -82,6 +104,7 @@ export function LivePanel() {
         setTimeout(() => setChanged((c) => { const n = { ...c }; for (const k of Object.keys(diff)) delete n[k]; return n; }), 6000);
       }
       setPlayers(list);
+      setBots(data.bots ?? null);
       setDetail(data.detail ?? null);
     } catch {
       setError('Sin conexión con el servidor.');
@@ -96,19 +119,28 @@ export function LivePanel() {
 
   const shown = players
     .filter((p) => !onlyOnline || p.online)
+    .filter((p) => showBots || !p.is_bot)
     .sort((a, b) => Number(b.online) - Number(a.online) || b.balance_cents - a.balance_cents);
-  const online = players.filter((p) => p.online).length;
+  // Solo personas: los bots van en su propio recuadro.
+  const humans = players.filter((p) => !p.is_bot);
+  const online = humans.filter((p) => p.online).length;
 
   return (
     <div>
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <Badge tone={online ? 'green' : 'slate'}>{online} conectados ahora</Badge>
-        <span className="text-sm text-slate-400">{players.length} jugadores en total</span>
+        <span className="text-sm text-slate-400">{humans.length} jugadores en total</span>
         <label className="ml-auto flex items-center gap-2 text-sm text-slate-300">
+          <input type="checkbox" checked={showBots} onChange={(e) => setShowBots(e.target.checked)} />
+          Mostrar bots
+        </label>
+        <label className="flex items-center gap-2 text-sm text-slate-300">
           <input type="checkbox" checked={onlyOnline} onChange={(e) => setOnlyOnline(e.target.checked)} />
           Solo conectados
         </label>
       </div>
+
+      {bots && <BotsBox m={bots} />}
 
       {error && <p className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</p>}
 
@@ -131,6 +163,35 @@ export function LivePanel() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+/** Los bots, siempre aparte de las personas. */
+function BotsBox({ m }: { m: BotMetrics }) {
+  if (!m.installed) {
+    return <p className="mb-5 rounded-xl border border-white/10 px-4 py-3 text-sm text-slate-400">Bots: falta ejecutar <code>17_bots.sql</code> en Supabase.</p>;
+  }
+  const items: [string, number | string][] = [
+    ['Online', m.online], ['Offline', m.offline], ['Jugando', m.playing], ['Idle', m.idle],
+    ['En eventos', m.inEvents], ['Buscando 1v1', m.lookingFor1v1], ['En 1v1', m.in1v1], ['Acciones/min', m.actionsPerMinute],
+  ];
+  const stale = m.lastTickAt ? Date.now() - new Date(m.lastTickAt).getTime() > 120_000 : true;
+  return (
+    <div className="mb-5 rounded-2xl border border-sky-400/20 bg-sky-500/5 px-4 py-3">
+      <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
+        <span className="font-semibold text-sky-300">Bots</span>
+        <Badge tone={m.enabled ? 'green' : 'slate'}>{m.enabled ? 'encendidos' : 'apagados (BOTS_ENABLED)'}</Badge>
+        <span className="text-xs text-slate-400">objetivo {m.target} · rango {m.min}-{m.max} · {m.total} cuentas</span>
+        {m.enabled && stale && <Badge tone="gold">sin actividad reciente: ¿está el cron o el worker en marcha?</Badge>}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {items.map(([label, value]) => (
+          <span key={label} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-slate-300">
+            {label}: <b className="text-slate-100">{value}</b>
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -170,6 +231,7 @@ function Row({ player, delta, open, detail, onToggle, onDone }: {
       <button type="button" onClick={onToggle} className="flex w-full flex-wrap items-center gap-x-5 gap-y-1 px-4 py-3 text-left">
         <span className={`h-2.5 w-2.5 rounded-full ${player.online ? 'bg-emerald-400' : 'bg-slate-600'}`} />
         <span className="min-w-[8rem] font-semibold text-slate-100">{player.name}</span>
+        {player.is_bot && <span title="Jugador bot (no cuenta como persona)" className="rounded-md border border-sky-400/40 bg-sky-500/10 px-2 py-0.5 text-xs font-semibold text-sky-300">BOT</span>}
         <PlatformBadge platform={player.platform} />
         <span className="min-w-[9rem] font-display text-lg font-bold text-gold-400">
           {formatCents(player.balance_cents)}

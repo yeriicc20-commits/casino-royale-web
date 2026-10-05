@@ -96,6 +96,7 @@ hay versiones publicadas" en lugar de dar error. Eso es a propósito.
    - `backend/11_retos_blackjack.sql` — retos de blackjack entre amigos
    - `backend/12_eventos.sql` — puntos, ranking y premios de los eventos
    - `backend/13_competitivo.sql` — online 1 contra 1: rangos, emparejamiento, partidas, temporadas
+   - `backend/17_bots.sql` — jugadores bot (ver 10-quinquies)
 
    Todos son idempotentes: volver a ejecutarlos no rompe nada. El `07` borra
    todos los jugadores y el `08` es una versión concreta; esos solo cuando
@@ -351,6 +352,42 @@ cartas del crupier): gana quien termine con más fichas de partida.
 - **Pruebas del motor:** `npx tsx tests/competitivo.test.ts`.
 - **En Unity:** menú `Casino/Setup/Reconstruir online competitivo` rehace las
   pantallas; `Casino/Debug/Online de ejemplo/...` las enseña sin servidor.
+
+## 10-quinquies. Jugadores bot
+
+Entre 3 y 50 jugadores bot conectados (configurable), que juegan con los
+**mismos sistemas** que una persona: presencia y saldo en `online_players`,
+la cola del 1 contra 1 (`searchStep`, `online_mm_pair`), las partidas
+(`mutateMatch`), los retos de blackjack (`lib/duel-service.ts`), los eventos
+(`lib/events/actions.ts`) y la cola de ajustes de saldo. Todo es moneda ficticia.
+
+**Instalar**
+
+1. Ejecuta `backend/17_bots.sql` en Supabase (después de los demás).
+2. En Vercel pon `BOTS_ENABLED=true` (y, si quieres, el resto de `BOTS_*` de
+   `.env.example`).
+3. Algo tiene que moverlos, porque Vercel no tiene procesos permanentes. Una de dos:
+   - **Cron** cada minuto a `GET /api/cron/bots` con
+     `Authorization: Bearer <CRON_SECRET>` (cron-job.org es gratis y admite un
+     minuto). Cada llamada trabaja `BOTS_TICK_BUDGET_SECONDS` (50 s) y suelta.
+     Ojo: son ~50 s de función por minuto; en el plan Hobby puede comerse el
+     tiempo de función incluido. Baja el presupuesto o usa el worker.
+   - **Worker** en una máquina siempre encendida: `npm run bots:worker`
+     (lee `.env.local`; Ctrl+C lo para con orden).
+
+   Pueden convivir: el turno de `online_bot_runtime` hace que solo uno mueva
+   bots a la vez, y si uno muere el otro sigue a los pocos segundos.
+
+**Apagar todo:** `BOTS_ENABLED=false`. En la siguiente vuelta se desconectan
+todos: dejan la cola, abandonan la partida que tuvieran (la persona gana) y
+rechazan los retos pendientes. Tampoco salen ya en la clasificación.
+
+**Cómo distinguirlos:** `online_players.is_bot = true` y su fila en
+`online_bots`. El juego no ve la marca (las rutas no la devuelven). El panel
+en vivo (`/admin/en-vivo`) muestra las métricas de bots aparte y una marca
+**BOT**; las cifras de personas no los cuentan.
+
+**Pruebas:** `npm run test:bots` (20 pruebas, sin base de datos).
 
 ## 11. Conectar Unity
 

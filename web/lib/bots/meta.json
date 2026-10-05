@@ -1,0 +1,1705 @@
+{
+ "_info": "Generado desde los assets de Unity (pase, misiones, ruleta diaria, regalo diario). Si cambian alli, se regenera.",
+ "pass": {
+  "seasonOneStartUtc": "2026-09-30T22:00:00Z",
+  "seasonDays": 42,
+  "maxLevel": 100,
+  "xpPerLevel": 800,
+  "roundXpBase": 8,
+  "roundXpPerEuro": 2.0,
+  "roundXpMax": 30,
+  "roundXpPerDay": 4000,
+  "firstRoundOfDayXp": 200,
+  "missionXp": 150,
+  "premiumPriceEuros": 2500.0,
+  "levels": [
+   {
+    "level": 1,
+    "free": {
+     "coins": 10,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_neon_player"
+     ]
+    }
+   },
+   {
+    "level": 2,
+    "free": {
+     "coins": 10,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_10"
+     ]
+    }
+   },
+   {
+    "level": 3,
+    "free": {
+     "coins": 15,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_buscafortunas"
+     ]
+    }
+   },
+   {
+    "level": 4,
+    "free": {
+     "coins": 15,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_jade"
+     ]
+    }
+   },
+   {
+    "level": 5,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_trasnochador"
+     ]
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "fx_p_clover"
+     ]
+    }
+   },
+   {
+    "level": 6,
+    "free": {
+     "coins": 15,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "cloth_p_grey"
+     ]
+    }
+   },
+   {
+    "level": 7,
+    "free": {
+     "coins": 15,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_11"
+     ]
+    }
+   },
+   {
+    "level": 8,
+    "free": {
+     "coins": 20,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_sin_prisa"
+     ]
+    }
+   },
+   {
+    "level": 9,
+    "free": {
+     "coins": 20,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_12"
+     ]
+    }
+   },
+   {
+    "level": 10,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_8"
+     ]
+    },
+    "premium": {
+     "coins": 250,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_23"
+     ]
+    }
+   },
+   {
+    "level": 11,
+    "free": {
+     "coins": 20,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_ojo_halcon"
+     ]
+    }
+   },
+   {
+    "level": 12,
+    "free": {
+     "coins": 20,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_cazafichas"
+     ]
+    }
+   },
+   {
+    "level": 13,
+    "free": {
+     "coins": 25,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_valiente"
+     ]
+    }
+   },
+   {
+    "level": 14,
+    "free": {
+     "coins": 25,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_paciente"
+     ]
+    }
+   },
+   {
+    "level": 15,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "cloth_p_blue"
+     ]
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_14"
+     ]
+    }
+   },
+   {
+    "level": 16,
+    "free": {
+     "coins": 25,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_rey_pista"
+     ]
+    }
+   },
+   {
+    "level": 17,
+    "free": {
+     "coins": 25,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_lights"
+     ]
+    }
+   },
+   {
+    "level": 18,
+    "free": {
+     "coins": 30,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_wine"
+     ]
+    }
+   },
+   {
+    "level": 19,
+    "free": {
+     "coins": 30,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "fx_p_notes"
+     ]
+    }
+   },
+   {
+    "level": 20,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_steel"
+     ]
+    },
+    "premium": {
+     "coins": 250,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_neon_pink"
+     ]
+    }
+   },
+   {
+    "level": 21,
+    "free": {
+     "coins": 30,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "cloth_p_teal"
+     ]
+    }
+   },
+   {
+    "level": 22,
+    "free": {
+     "coins": 30,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_16"
+     ]
+    }
+   },
+   {
+    "level": 23,
+    "free": {
+     "coins": 35,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_tahur"
+     ]
+    }
+   },
+   {
+    "level": 24,
+    "free": {
+     "coins": 35,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_laurel_s"
+     ]
+    }
+   },
+   {
+    "level": 25,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "fx_p_stars"
+     ]
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_magnate_neon"
+     ]
+    }
+   },
+   {
+    "level": 26,
+    "free": {
+     "coins": 35,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_ocean"
+     ]
+    }
+   },
+   {
+    "level": 27,
+    "free": {
+     "coins": 35,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "fx_p_snow"
+     ]
+    }
+   },
+   {
+    "level": 28,
+    "free": {
+     "coins": 40,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "cloth_p_wine"
+     ]
+    }
+   },
+   {
+    "level": 29,
+    "free": {
+     "coins": 40,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_17"
+     ]
+    }
+   },
+   {
+    "level": 30,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_blue"
+     ]
+    },
+    "premium": {
+     "coins": 250,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_neon_pk"
+     ]
+    }
+   },
+   {
+    "level": 31,
+    "free": {
+     "coins": 40,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_mente_fria"
+     ]
+    }
+   },
+   {
+    "level": 32,
+    "free": {
+     "coins": 40,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_hearts"
+     ]
+    }
+   },
+   {
+    "level": 33,
+    "free": {
+     "coins": 45,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_sunset"
+     ]
+    }
+   },
+   {
+    "level": 34,
+    "free": {
+     "coins": 45,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "fx_p_diamonds"
+     ]
+    }
+   },
+   {
+    "level": 35,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_noctambulo"
+     ]
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "cloth_p_amber"
+     ]
+    }
+   },
+   {
+    "level": 36,
+    "free": {
+     "coins": 45,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_18"
+     ]
+    }
+   },
+   {
+    "level": 37,
+    "free": {
+     "coins": 45,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_acero"
+     ]
+    }
+   },
+   {
+    "level": 38,
+    "free": {
+     "coins": 50,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_stars"
+     ]
+    }
+   },
+   {
+    "level": 39,
+    "free": {
+     "coins": 50,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_ice"
+     ]
+    }
+   },
+   {
+    "level": 40,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_9"
+     ]
+    },
+    "premium": {
+     "coins": 250,
+     "xp": 0,
+     "cosmetics": [
+      "fx_p_neon"
+     ]
+    }
+   },
+   {
+    "level": 41,
+    "free": {
+     "coins": 50,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "fx_p_spades"
+     ]
+    }
+   },
+   {
+    "level": 42,
+    "free": {
+     "coins": 50,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "cloth_p_black"
+     ]
+    }
+   },
+   {
+    "level": 43,
+    "free": {
+     "coins": 55,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_poker_face"
+     ]
+    }
+   },
+   {
+    "level": 44,
+    "free": {
+     "coins": 55,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_jade"
+     ]
+    }
+   },
+   {
+    "level": 45,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_copper"
+     ]
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "fx_p_dice"
+     ]
+    }
+   },
+   {
+    "level": 46,
+    "free": {
+     "coins": 55,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_tiburon"
+     ]
+    }
+   },
+   {
+    "level": 47,
+    "free": {
+     "coins": 55,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_afilado"
+     ]
+    }
+   },
+   {
+    "level": 48,
+    "free": {
+     "coins": 60,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_calculador"
+     ]
+    }
+   },
+   {
+    "level": 49,
+    "free": {
+     "coins": 60,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_principiante"
+     ]
+    }
+   },
+   {
+    "level": 50,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "cloth_p_purple"
+     ]
+    },
+    "premium": {
+     "coins": 250,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_season1"
+     ]
+    }
+   },
+   {
+    "level": 51,
+    "free": {
+     "coins": 60,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_19"
+     ]
+    }
+   },
+   {
+    "level": 52,
+    "free": {
+     "coins": 60,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_fichas"
+     ]
+    }
+   },
+   {
+    "level": 53,
+    "free": {
+     "coins": 65,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_ice"
+     ]
+    }
+   },
+   {
+    "level": 54,
+    "free": {
+     "coins": 65,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_neon_cy"
+     ]
+    }
+   },
+   {
+    "level": 55,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_mano_firme"
+     ]
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "fx_p_bolts"
+     ]
+    }
+   },
+   {
+    "level": 56,
+    "free": {
+     "coins": 65,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "cloth_p_diamonds"
+     ]
+    }
+   },
+   {
+    "level": 57,
+    "free": {
+     "coins": 65,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_20"
+     ]
+    }
+   },
+   {
+    "level": 58,
+    "free": {
+     "coins": 70,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_rompebancas"
+     ]
+    }
+   },
+   {
+    "level": 59,
+    "free": {
+     "coins": 70,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_fire"
+     ]
+    }
+   },
+   {
+    "level": 60,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_13"
+     ]
+    },
+    "premium": {
+     "coins": 250,
+     "xp": 0,
+     "cosmetics": [
+      "cloth_p_neon"
+     ]
+    }
+   },
+   {
+    "level": 61,
+    "free": {
+     "coins": 70,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_gold"
+     ]
+    }
+   },
+   {
+    "level": 62,
+    "free": {
+     "coins": 70,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "fx_p_flowers"
+     ]
+    }
+   },
+   {
+    "level": 63,
+    "free": {
+     "coins": 75,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "cloth_p_suits"
+     ]
+    }
+   },
+   {
+    "level": 64,
+    "free": {
+     "coins": 75,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_21"
+     ]
+    }
+   },
+   {
+    "level": 65,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_green"
+     ]
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_dados"
+     ]
+    }
+   },
+   {
+    "level": 66,
+    "free": {
+     "coins": 75,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_gems"
+     ]
+    }
+   },
+   {
+    "level": 67,
+    "free": {
+     "coins": 75,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_galaxy"
+     ]
+    }
+   },
+   {
+    "level": 68,
+    "free": {
+     "coins": 80,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "fx_p_crowns"
+     ]
+    }
+   },
+   {
+    "level": 69,
+    "free": {
+     "coins": 80,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_22"
+     ]
+    }
+   },
+   {
+    "level": 70,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "fx_p_hearts"
+     ]
+    },
+    "premium": {
+     "coins": 250,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_25"
+     ]
+    }
+   },
+   {
+    "level": 71,
+    "free": {
+     "coins": 80,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_corazones"
+     ]
+    }
+   },
+   {
+    "level": 72,
+    "free": {
+     "coins": 80,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_neon_vio"
+     ]
+    }
+   },
+   {
+    "level": 73,
+    "free": {
+     "coins": 85,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_hearts"
+     ]
+    }
+   },
+   {
+    "level": 74,
+    "free": {
+     "coins": 85,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_24"
+     ]
+    }
+   },
+   {
+    "level": 75,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_neon_cyan"
+     ]
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_29"
+     ]
+    }
+   },
+   {
+    "level": 76,
+    "free": {
+     "coins": 85,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_as_manga"
+     ]
+    }
+   },
+   {
+    "level": 77,
+    "free": {
+     "coins": 85,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_chips"
+     ]
+    }
+   },
+   {
+    "level": 78,
+    "free": {
+     "coins": 90,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_26"
+     ]
+    }
+   },
+   {
+    "level": 79,
+    "free": {
+     "coins": 90,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_fantasma"
+     ]
+    }
+   },
+   {
+    "level": 80,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_lobo"
+     ]
+    },
+    "premium": {
+     "coins": 250,
+     "xp": 0,
+     "cosmetics": [
+      "fx_p_rainbow"
+     ]
+    }
+   },
+   {
+    "level": 81,
+    "free": {
+     "coins": 90,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_voz_noche"
+     ]
+    }
+   },
+   {
+    "level": 82,
+    "free": {
+     "coins": 90,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_alma_neon"
+     ]
+    }
+   },
+   {
+    "level": 83,
+    "free": {
+     "coins": 95,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_27"
+     ]
+    }
+   },
+   {
+    "level": 84,
+    "free": {
+     "coins": 95,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_intocable"
+     ]
+    }
+   },
+   {
+    "level": 85,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_15"
+     ]
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_crown"
+     ]
+    }
+   },
+   {
+    "level": 86,
+    "free": {
+     "coins": 95,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_diamond"
+     ]
+    }
+   },
+   {
+    "level": 87,
+    "free": {
+     "coins": 95,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "fx_p_comets"
+     ]
+    }
+   },
+   {
+    "level": 88,
+    "free": {
+     "coins": 100,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "cloth_p_royal"
+     ]
+    }
+   },
+   {
+    "level": 89,
+    "free": {
+     "coins": 100,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "avatar_28"
+     ]
+    }
+   },
+   {
+    "level": 90,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "cloth_p_red"
+     ]
+    },
+    "premium": {
+     "coins": 250,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_rainbow"
+     ]
+    }
+   },
+   {
+    "level": 91,
+    "free": {
+     "coins": 100,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_emperador"
+     ]
+    }
+   },
+   {
+    "level": 92,
+    "free": {
+     "coins": 100,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_ruby"
+     ]
+    }
+   },
+   {
+    "level": 93,
+    "free": {
+     "coins": 105,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_inferno"
+     ]
+    }
+   },
+   {
+    "level": 94,
+    "free": {
+     "coins": 105,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "cloth_p_gold"
+     ]
+    }
+   },
+   {
+    "level": 95,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "back_p_black"
+     ]
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_mito"
+     ]
+    }
+   },
+   {
+    "level": 96,
+    "free": {
+     "coins": 105,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_marquee"
+     ]
+    }
+   },
+   {
+    "level": 97,
+    "free": {
+     "coins": 105,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "cloth_p_galaxy"
+     ]
+    }
+   },
+   {
+    "level": 98,
+    "free": {
+     "coins": 110,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_rey_noche"
+     ]
+    }
+   },
+   {
+    "level": 99,
+    "free": {
+     "coins": 110,
+     "xp": 0,
+     "cosmetics": []
+    },
+    "premium": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "title_p_leyenda_neon"
+     ]
+    }
+   },
+   {
+    "level": 100,
+    "free": {
+     "coins": 0,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_laurel_g"
+     ]
+    },
+    "premium": {
+     "coins": 250,
+     "xp": 0,
+     "cosmetics": [
+      "frame_p_season1"
+     ]
+    }
+   }
+  ]
+ },
+ "wheel": [
+  {
+   "euros": 2,
+   "weight": 22
+  },
+  {
+   "euros": 5,
+   "weight": 18
+  },
+  {
+   "euros": 10,
+   "weight": 14
+  },
+  {
+   "euros": 3,
+   "weight": 18
+  },
+  {
+   "euros": 25,
+   "weight": 8
+  },
+  {
+   "euros": 5,
+   "weight": 16
+  },
+  {
+   "euros": 50,
+   "weight": 4
+  },
+  {
+   "euros": 2,
+   "weight": 20
+  },
+  {
+   "euros": 15,
+   "weight": 10
+  },
+  {
+   "euros": 5,
+   "weight": 16
+  },
+  {
+   "euros": 10,
+   "weight": 12
+  },
+  {
+   "euros": 100,
+   "weight": 1
+  }
+ ],
+ "gift": [
+  10,
+  15,
+  20,
+  30,
+  40,
+  60,
+  150
+ ],
+ "giftRestartOnMiss": true,
+ "missions": [
+  {
+   "id": "rounds_10",
+   "metric": "rounds",
+   "machineId": "",
+   "target": 10.0,
+   "rewardEuros": 8.0
+  },
+  {
+   "id": "rounds_25",
+   "metric": "rounds",
+   "machineId": "",
+   "target": 25.0,
+   "rewardEuros": 18.0
+  },
+  {
+   "id": "wins_5",
+   "metric": "wins",
+   "machineId": "",
+   "target": 5.0,
+   "rewardEuros": 12.0
+  },
+  {
+   "id": "wins_12",
+   "metric": "wins",
+   "machineId": "",
+   "target": 12.0,
+   "rewardEuros": 25.0
+  },
+  {
+   "id": "wagered_100",
+   "metric": "wagered",
+   "machineId": "",
+   "target": 100.0,
+   "rewardEuros": 10.0
+  },
+  {
+   "id": "wagered_300",
+   "metric": "wagered",
+   "machineId": "",
+   "target": 300.0,
+   "rewardEuros": 25.0
+  },
+  {
+   "id": "returned_150",
+   "metric": "returned",
+   "machineId": "",
+   "target": 150.0,
+   "rewardEuros": 15.0
+  },
+  {
+   "id": "slots_15",
+   "metric": "rounds",
+   "machineId": "slots",
+   "target": 15.0,
+   "rewardEuros": 14.0
+  },
+  {
+   "id": "roulette_10",
+   "metric": "rounds",
+   "machineId": "roulette",
+   "target": 10.0,
+   "rewardEuros": 14.0
+  },
+  {
+   "id": "blackjack_10",
+   "metric": "rounds",
+   "machineId": "blackjack",
+   "target": 10.0,
+   "rewardEuros": 14.0
+  },
+  {
+   "id": "crash_8",
+   "metric": "rounds",
+   "machineId": "crash",
+   "target": 8.0,
+   "rewardEuros": 12.0
+  },
+  {
+   "id": "mines_8",
+   "metric": "rounds",
+   "machineId": "mines",
+   "target": 8.0,
+   "rewardEuros": 12.0
+  }
+ ],
+ "dailyMissions": 3
+}

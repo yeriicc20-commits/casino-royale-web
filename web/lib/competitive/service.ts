@@ -567,4 +567,113 @@ export async function lastOpponent(playerId: string): Promise<string | null> {
   return r.player_a === playerId ? r.player_b : r.player_a;
 }
 
+// ---------------------------------------------------------------------------- buscar rival
+
+export type SearchOutcome =
+  | { kind: 'banned'; seconds: number }
+  | { kind: 'match'; row: MatchRow }
+  | { kind: 'timeout'; elapsed: number }
+  | { kind: 'error'; message: string }
+  | { kind: 'searching'; elapsed: number; window: number; count: number; mmr: number; points: number };
+
+/**
+ * Un paso de "buscar rival": lo que hace la ruta del juego cada 2 s mientras se
+ * busca, y lo que hace un bot que busca partida. Mismo ticket, misma ventana de
+ * MMR que se abre con el tiempo y el mismo emparejamiento bloqueado en SQL.
+ */
+export async function searchStep(me: string, def: GameDef, mode: Mode, opts: { withCount?: boolean } = {}): Promise<SearchOutcome> {
+  const ban = await banState(me);
+  if (ban.bannedSeconds > 0 && mode === 'competitive') return { kind: 'banned', seconds: ban.bannedSeconds };
+
+  // ¿Ya tiene partida? Se vuelve a ella (reconexión).
+  const active = await activeMatchOf(me);
+  if (active) {
+    await db().from('online_mm_queue').delete().eq('player_id', me);
+    const { row } = await mutateMatch(active.id, () => null);
+    return { kind: 'match', row };
+  }
+
+  const MM = config.matchmaking;
+  let ticket = await loadTicket(me);
+  if (ticket?.match_id) {
+    const row = await loadMatch(ticket.match_id);
+    await db().from('online_mm_queue').delete().eq('player_id', me);
+    if (row && row.status === 'live') return { kind: 'match', row };
+    ticket = null;
+  }
+
+  const season = seasonAt(config, Date.now()).number;
+  const mine = await ladder(me, season, def.id);
+  const now = new Date();
+  if (!ticket || ticket.game_id !== def.id || ticket.mode !== mode) {
+    await db().from('online_mm_queue').upsert({ player_id: me, game_id: def.id, mode, mmr: mine.mmr, joined_at: now.toISOString(), ping_at: now.toISOString(), match_id: null });
+    ticket = await loadTicket(me);
+  } else {
+    await db().from('online_mm_queue').update({ ping_at: now.toISOString(), mmr: mine.mmr }).eq('player_id', me);
+  }
+  if (!ticket) return { kind: 'error', message: 'El competitivo aún no está activado en el servidor.' };
+
+  const elapsed = Math.max(0, (now.getTime() - Date.parse(ticket.joined_at)) / 1000);
+  if (elapsed > MM.maxSearchSeconds) {
+    await db().from('online_mm_queue').delete().eq('player_id', me).is('match_id', null);
+    return { kind: 'timeout', elapsed };
+  }
+
+  const window = mmrWindow(config, elapsed, mode === 'casual');
+  const avoid = elapsed < MM.avoidRecentUntilSeconds ? await lastOpponent(me) : null;
+  const matchId = newMatchId();
+  const { data: opponent, error } = await db().rpc('online_mm_pair', {
+    p_player: me, p_game: def.id, p_mode: mode, p_mmr: mine.mmr, p_window: window, p_avoid: avoid, p_match: matchId, p_stale_seconds: MM.ticketStaleSeconds,
+  });
+  if (error) {
+    console.error('[competitive.pair]', error);
+    return { kind: 'error', message: 'El competitivo aún no está activado en el servidor.' };
+  }
+
+  if (opponent) {
+    const row = await createMatch(matchId, def.id, mode, me, String(opponent));
+    await db().from('online_mm_queue').delete().eq('player_id', me);
+    if (row) return { kind: 'match', row };
+    await db().from('online_mm_queue').delete().eq('player_id', String(opponent));
+    return { kind: 'error', message: 'No se pudo crear la partida. Vuelve a buscar.' };
+  }
+
+  return {
+    kind: 'searching', elapsed, window, mmr: mine.mmr, points: mine.points,
+    count: opts.withCount ? await searchingCount(def.id, mode) : 0,
+  };
+}
+
+/**
+ * Jugar contra alguien CONCRETO que está buscando (un bot que acepta a una
+ * persona). online_mm_pair_with lo hace en una sentencia bloqueada: si esa
+ * persona ya tiene rival, o dos bots lo intentan a la vez, solo uno gana.
+ */
+export async function pairWith(me: string, target: string, def: GameDef, mode: Mode): Promise<MatchRow | null> {
+  if (await activeMatchOf(me)) return null;
+  const season = seasonAt(config, Date.now()).number;
+  const mine = await ladder(me, season, def.id);
+  const matchId = newMatchId();
+  const { data: paired, error } = await db().rpc('online_mm_pair_with', {
+    p_player: me, p_target: target, p_game: def.id, p_mode: mode, p_mmr: mine.mmr, p_match: matchId,
+    p_stale_seconds: config.matchmaking.ticketStaleSeconds,
+  });
+  if (error) {
+    console.error('[competitive.pairWith]', error.message);
+    return null;
+  }
+  if (!paired) return null;
+  const row = await createMatch(matchId, def.id, mode, target, me);
+  await db().from('online_mm_queue').delete().eq('player_id', me);
+  if (row) return row;
+  // No se pudo crear: los dos vuelven a la cola como estaban.
+  await db().from('online_mm_queue').update({ match_id: null }).eq('player_id', target).eq('match_id', matchId);
+  return null;
+}
+
+/** Dejar de buscar (lo mismo que el botón CANCELAR). */
+export async function cancelSearch(me: string) {
+  await db().from('online_mm_queue').delete().eq('player_id', me).is('match_id', null);
+}
+
 export { abandon, placeBet, playAction, setReady, mmrWindow, seasonAt, legendTitle };
